@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  modo: MyString
+  nome: MyString
+  email: MyString
+  categoria: MyString
+  local: MyString
+  descricao: MyText
+  protocolo: MyString
+
+two:
+  modo: MyString
+  nome: MyString
+  email: MyString
+  categoria: MyString
+  local: MyString
+  descricao: MyText
+  protocolo: MyString
