@@ -6,34 +6,80 @@
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
 
-  <%# Load the standard application CSS (currently empty) %>
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-  
-  <%# DIRECTLY load your reports CSS %>
   <%= stylesheet_link_tag "reports", "data-turbo-track": "reload" %>
-
   <%= javascript_importmap_tags %>
 </head>
 
-  <body>
-    <header>
-      <div class="wrap">
-        <div class="badge">Canal de Denúncias</div>
-        <h1>
-          <%= content_for?(:header_title) ? yield(:header_title) : "Fale com Segurança" %>
-        </h1>
-        <p style="opacity: 0.8; margin-top: 10px;">
-          <%= content_for?(:header_desc) ? yield(:header_desc) : "Relatos confidenciais e anônimos." %>
-        </p>
+<body>
+  <header class="main-header">
+    <div class="wrap header-flex">
+      <div class="header-titles">
+        <span class="app-logo">Canal de Denúncias</span>
+        <h1><%= yield :header_title %></h1>
+        <p><%= yield :header_desc %></p>
       </div>
-    </header>
 
-    <main>
-      <%= yield %>
-    </main>
+      <nav class="header-nav" data-controller="dropdown">
+        <button class="dropdown__btn" data-action="click->dropdown#toggle" type="button">
+          <span>Menu</span>
+          <span style="font-size: 0.7rem;">▼</span>
+        </button>
+              
+ <div class="dropdown__menu" data-dropdown-target="menu" hidden>
+  <div class="dropdown__header">Navegação</div>
+  
+  <%= link_to root_path, class: "dropdown__item" do %>
+    <strong>Enviar Relato</strong>
+    <small>Registrar nova ocorrência</small>
+  <% end %>
 
-    <footer style="margin: 40px 0; text-align: center; opacity: 0.5; font-size: 0.8rem;">
-      <p>© 2026 ISM GOMES DE MATTOS — Canal de Denúncias</p>
-    </footer>
-  </body>
+          <%= link_to lookup_report_path, class: "dropdown__item" do %>
+            <strong>Acompanhar Relato</strong>
+            <small>Consultar status pelo protocolo</small>
+          <% end %>
+
+          <% if authenticated? %>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 0.5rem 0;">
+            <%= link_to reports_path, class: "dropdown__item" do %>
+              <strong>Administração</strong>
+              <small>Gerenciar relatos recebidos</small>
+            <% end %>
+            
+            <div class="dropdown__header">Sessão</div>
+            
+            <%= button_to session_path, 
+                method: :delete, 
+                class: "dropdown__item", 
+                style: "width: 100%; text-align: left; background: none; border: none; cursor: pointer; display: block;" do %>
+              <strong style="color: #dc2626;">Encerrar Sessão</strong>
+              <small>Sair da conta de <%= Current.user.username %></small>
+            <% end %>
+          <% else %>
+            <%= link_to new_session_path, class: "dropdown__item" do %>
+              <strong>Login Administrativo</strong>
+              <small>Acesso para membros da empresa</small>
+            <% end %>
+          <% end %>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    
+    <% if flash[:notice] %>
+      <div class="badge badge--resolvido" style="width: 100%; margin-bottom: 1rem; padding: 1rem;">
+        <%= flash[:notice] %>
+      </div>
+    <% end %>
+    <% if flash[:alert] %>
+      <div class="report-form__feedback" style="margin-bottom: 1rem;">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+
+    <%= yield %>
+  </main>
+</body>
 </html>

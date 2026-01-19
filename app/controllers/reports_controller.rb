@@ -1,12 +1,12 @@
 class ReportsController < ApplicationController
-  before_action :set_report, only: %i[ show edit update destroy ]
+  allow_unauthenticated_access only: %i[ new create show lookup ]
+  before_action :set_report, only: %i[ show edit update destroy update_status ]
 
   def index
-    @reports = Report.all
+    @reports = Report.all.order(created_at: :desc)
   end
 
   def show
-    # Rails automatically renders show.html.erb
   end
 
   def new
@@ -18,9 +18,8 @@ class ReportsController < ApplicationController
 
   def create
     @report = Report.new(report_params)
-
     if @report.save
-      redirect_to @report, notice: "Relato enviado com sucesso!"
+      redirect_to @report, notice: "Relato enviado com sucesso! Guarde seu protocolo: #{@report.protocolo}"
     else
       render :new, status: :unprocessable_entity
     end
@@ -28,28 +27,43 @@ class ReportsController < ApplicationController
 
   def update
     if @report.update(report_params)
-      # Redirects to the "Ver" page after editing
       redirect_to @report, notice: "Relato atualizado com sucesso."
     else
       render :edit, status: :unprocessable_entity
     end
   end
 
+  def update_status
+    if @report.update(status: params[:status])
+      redirect_to reports_path, notice: "Status atualizado para #{@report.status.humanize}."
+    else
+      redirect_to reports_path, alert: "Erro ao atualizar status."
+    end
+  end
+
   def destroy
     @report.destroy!
-    # Returns to the administration list
     redirect_to reports_path, notice: "Relato excluído permanentemente.", status: :see_other
   end
 
-  private
+  # MOVED ABOVE PRIVATE:
+  def lookup
+    if params[:protocolo].present?
+      @report = Report.find_by(protocolo: params[:protocolo].upcase.strip)
+      
+      if @report.nil?
+        flash.now[:alert] = "Protocolo não encontrado. Verifique o código e tente novamente."
+      end
+    end
+  end
+
+  private # Methods below this line are not accessible by the router
 
   def set_report
-    # params.expect is a Rails 8 feature. 
-    # If you get an error here, use: @report = Report.find(params[:id])
     @report = Report.find(params.expect(:id))
   end
 
   def report_params
-    params.expect(report: [ :modo, :nome, :email, :categoria, :local, :descricao, :protocolo ])
+    params.expect(report: [ :modo, :nome, :email, :categoria, :local, :descricao, :protocolo, :status ])
   end
-end
+end # Final end for the class

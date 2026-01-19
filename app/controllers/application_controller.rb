@@ -1,7 +1,6 @@
 class ApplicationController < ActionController::Base
-  # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
-  allow_browser versions: :modern
-
-  # Changes to the importmap will invalidate the etag for HTML responses
-  stale_when_importmap_changes
+  include Authentication
+  # This ensures that even on "Guest" pages, we check if an admin is present
+  # so the menu shows "Sair" instead of "Login".
+  before_action :resume_session
 end

@@ -17,28 +17,38 @@
           <th class="text-right">Ações</th>
         </tr>
       </thead>
-      <tbody>
-        <% @reports.each do |report| %>
-          <tr>
-            <td><strong><%= report.protocolo %></strong></td>
-            <td><%= report.categoria %></td>
-            <td><span class="badge badge--pending">Pendente</span></td>
-            <td class="text-right">
-              
-              <div class="action-group">
-                <%= link_to "Ver", report, class: "link-action" %>
-                <%= link_to "Editar", edit_report_path(report), class: "link-action" %>
-                <%# button_to creates a form, so we ensure it's inline %>
-                <%= button_to "Excluir", report, method: :delete, 
-                    form: { style: "display:inline-block;" }, 
-                    data: { turbo_confirm: "Tem certeza?" }, 
-                    class: "link-delete" %>
-              </div>
+<tbody>
+  <% @reports.each do |report| %>
+    <tr>
+      <td><strong><%= report.protocolo %></strong></td>
+      <td><%= report.categoria %></td>
 
-            </td>
-          </tr>
+      <td>
+        <%= form_with url: update_status_report_path(report), method: :patch, class: "inline-form" do |f| %>
+          <%= f.select :status, 
+              Report.statuses.keys.map { |s| [s.humanize, s] }, 
+              { selected: report.status }, 
+              { 
+                class: "badge badge--#{report.status}", 
+                onchange: "this.form.requestSubmit()",
+                style: "cursor: pointer; border: none; font-family: inherit; appearance: none; -webkit-appearance: none;" 
+              } %>
         <% end %>
-      </tbody>
+      </td>
+
+      <td class="text-right">
+        <div class="action-group">
+          <%= link_to "Ver", report, class: "link-action" %>
+          <%= link_to "Editar", edit_report_path(report), class: "link-action" %>
+          <%= button_to "Excluir", report, method: :delete, 
+              form: { style: "display:inline-block;" }, 
+              data: { turbo_confirm: "Tem certeza que deseja excluir permanentemente este relato?" }, 
+              class: "link-delete" %>
+        </div>
+      </td>
+    </tr>
+  <% end %>
+</tbody>
     </table>
   </div>
 </article>

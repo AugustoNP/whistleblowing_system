@@ -1,0 +1,37 @@
+<% content_for :header_title, "Consultar Relato" %>
+<% content_for :header_desc, "Digite seu protocolo para acompanhar o andamento." %>
+
+<article class="card" style="max-width: 500px; margin: 0 auto;">
+  
+<% if params[:protocolo].present? && @report.nil? %>
+  <div class="alert alert--danger">
+    <strong>Não encontrado:</strong> O protocolo <code><%= params[:protocolo] %></code> não consta em nosso sistema.
+  </div>
+<% end %>
+
+  <%= form_with url: lookup_report_path, method: :get, class: "report-form", data: { turbo: false } do |f| %>
+    <div class="form-field">
+      <%= f.label :protocolo, "Número do Protocolo" %>
+      <%= f.text_field :protocolo, 
+          placeholder: "Ex: CD-A1B2-C3D4", 
+          class: "form-input", 
+          value: params[:protocolo],
+          required: true %>
+    </div>
+    
+    <%= f.submit "Pesquisar", class: "button button--primary", style: "width: 100%;" %>
+  <% end %>
+
+  <% if @report %>
+    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+      <h3 style="margin-bottom: 1rem;">Status do Relato</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span><strong>Protocolo:</strong> <%= @report.protocolo %></span>
+        <span class="badge badge--<%= @report.status %>"><%= @report.status.humanize %></span>
+      </div>
+      <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+        Última atualização: <%= @report.updated_at.strftime("%d/%m/%Y às %H:%M") %>
+      </p>
+    </div>
+  <% end %>
+</article>
