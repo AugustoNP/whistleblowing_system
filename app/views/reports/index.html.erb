@@ -24,12 +24,17 @@
             <td><%= report.categoria %></td>
             <td><span class="badge badge--pending">Pendente</span></td>
             <td class="text-right">
-              <nav class="action-group">
+              
+              <div class="action-group">
                 <%= link_to "Ver", report, class: "link-action" %>
                 <%= link_to "Editar", edit_report_path(report), class: "link-action" %>
+                <%# button_to creates a form, so we ensure it's inline %>
                 <%= button_to "Excluir", report, method: :delete, 
-                    data: { turbo_confirm: "Tem certeza?" }, class: "link-delete" %>
-              </nav>
+                    form: { style: "display:inline-block;" }, 
+                    data: { turbo_confirm: "Tem certeza?" }, 
+                    class: "link-delete" %>
+              </div>
+
             </td>
           </tr>
         <% end %>
