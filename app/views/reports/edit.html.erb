@@ -1,12 +1,17 @@
-<% content_for :title, "Editing report" %>
+<% content_for :header_title, "Painel de Edição" %>
+<% content_for :header_desc, "Alterando o protocolo: #{@report.protocolo}" %>
 
-<h1>Editing report</h1>
+<article class="card">
+  <header class="card__header">
+    <h2 class="card__title">Editar Informações</h2>
+  </header>
+  
+  <div class="card__body">
+    <%= render "form", report: @report %>
+  </div>
 
-<%= render "form", report: @report %>
-
-<br>
-
-<div>
-  <%= link_to "Show this report", @report %> |
-  <%= link_to "Back to reports", reports_path %>
-</div>
+  <footer class="card__footer card__footer--actions">
+    <%= link_to "Visualizar (Ver)", @report, class: "link-action" %>
+    <%= link_to "Voltar para Lista", reports_path, class: "link-action" %>
+  </footer>
+</article>

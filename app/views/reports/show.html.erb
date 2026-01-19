@@ -1,10 +1,57 @@
-<p style="color: green"><%= notice %></p>
+<% content_for :header_title, "Detalhes do Relato" %>
+<% content_for :header_desc, "Visualizando o protocolo: #{@report.protocolo}" %>
 
-<%= render @report %>
+<article class="card">
+  <header class="card__header card__header--split">
+    <h2 class="card__title">Detalhes do Relato</h2>
+    <span class="badge badge--protocol">Protocolo: <%= @report.protocolo %></span>
+  </header>
 
-<div>
-  <%= link_to "Edit this report", edit_report_path(@report) %> |
-  <%= link_to "Back to reports", reports_path %>
+  <section class="report-details">
+    <div class="report-details__grid">
+      <div class="detail-item">
+        <label class="detail-item__label">Modo de Envio</label>
+        <p class="detail-item__value"><%= @report.modo.capitalize %></p>
+      </div>
+      <div class="detail-item">
+        <label class="detail-item__label">Categoria</label>
+        <p class="detail-item__value"><%= @report.categoria %></p>
+      </div>
+    </div>
 
-  <%= button_to "Destroy this report", @report, method: :delete %>
-</div>
+    <% if @report.modo == "identificado" %>
+      <div class="report-details__highlight-box">
+        <div class="detail-item">
+          <label class="detail-item__label">Nome</label>
+          <p><%= @report.nome.presence || "Não informado" %></p>
+        </div>
+        <div class="detail-item">
+          <label class="detail-item__label">E-mail</label>
+          <p><%= @report.email.presence || "Não informado" %></p>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="detail-item">
+      <label class="detail-item__label">Local/Unidade</label>
+      <p><%= @report.local.presence || "Não informado" %></p>
+    </div>
+
+    <div class="detail-item">
+      <label class="detail-item__label">Descrição dos Fatos</label>
+      <div class="detail-item__content-box">
+        <%= @report.descricao %>
+      </div>
+    </div>
+  </section>
+
+  <footer class="card__footer">
+    <time class="timestamp">Relato criado em: <%= @report.created_at.strftime("%d/%m/%Y às %H:%M") %></time>
+    
+    <div class="card__footer-actions">
+      <%= link_to "Voltar para Lista", reports_path, class: "button button--outline" %>
+      <%= link_to "Editar Informações", edit_report_path(@report), class: "button button--secondary" %>
+      <button onclick="window.print()" class="button button--print">Imprimir PDF</button>
+    </div>
+  </footer>
+</article>

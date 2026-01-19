@@ -1,16 +1,39 @@
-<p style="color: green"><%= notice %></p>
+<% content_for :header_title, "Painel de Administração" %>
+<% content_for :header_desc, "Gestão e monitoramento de relatos recebidos." %>
 
-<% content_for :title, "Reports" %>
+<article class="card">
+  <header class="card__header card__header--split">
+    <h2 class="card__title">Relatos Recebidos</h2>
+    <%= link_to "Novo Relato", new_report_path, class: "button button--primary" %>
+  </header>
 
-<h1>Reports</h1>
-
-<div id="reports">
-  <% @reports.each do |report| %>
-    <%= render report %>
-    <p>
-      <%= link_to "Show this report", report %>
-    </p>
-  <% end %>
-</div>
-
-<%= link_to "New report", new_report_path %>
+  <div class="card__table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Protocolo</th>
+          <th>Categoria</th>
+          <th>Status</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @reports.each do |report| %>
+          <tr>
+            <td><strong><%= report.protocolo %></strong></td>
+            <td><%= report.categoria %></td>
+            <td><span class="badge badge--pending">Pendente</span></td>
+            <td class="text-right">
+              <nav class="action-group">
+                <%= link_to "Ver", report, class: "link-action" %>
+                <%= link_to "Editar", edit_report_path(report), class: "link-action" %>
+                <%= button_to "Excluir", report, method: :delete, 
+                    data: { turbo_confirm: "Tem certeza?" }, class: "link-delete" %>
+              </nav>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</article>

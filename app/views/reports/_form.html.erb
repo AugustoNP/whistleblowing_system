@@ -1,52 +1,88 @@
-<%= form_with(model: report) do |form| %>
-  <% if report.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(report.errors.count, "error") %> prohibited this report from being saved:</h2>
+<%= form_with(model: report, class: "report-form", id: "cd-form", data: { controller: "report" }) do |f| %>
 
-      <ul>
+  <header class="report-form__header">
+    <h2 id="form-title">Enviar um relato</h2>
+    <p class="report-form__subtitle">Preencha os campos abaixo para registrar sua ocorrência.</p>
+  </header>
+
+  <% if report.errors.any? %>
+    <section class="report-form__feedback" role="alert">
+      <h3><%= report.errors.count %> erro(s) impediram o envio:</h3>
+      <ul class="error-list">
         <% report.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
       </ul>
-    </div>
+    </section>
   <% end %>
 
-  <div>
-    <%= form.label :modo, style: "display: block" %>
-    <%= form.text_field :modo %>
+  <div class="report-form__body">
+    
+    <fieldset class="report-form__group">
+      <legend class="report-form__label">Modo de envio</legend>
+      <div class="report-form__radio-group">
+        <label class="radio-option">
+          <%= f.radio_button :modo, "anonimo", checked: true, data: { action: "change->report#toggle" } %> 
+          <span>Anônimo</span>
+        </label>
+        <label class="radio-option">
+          <%= f.radio_button :modo, "identificado", data: { action: "change->report#toggle" } %> 
+          <span>Identificado</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <section class="report-form__section" data-report-target="identificacao" hidden>
+      <div class="form-row">
+        <div class="form-field">
+          <%= f.label :nome, "Nome (opcional)" %>
+          <%= f.text_field :nome, class: "form-input", placeholder: "Seu nome completo" %>
+        </div>
+        <div class="form-field">
+          <%= f.label :email, "E-mail (opcional)" %>
+          <%= f.email_field :email, class: "form-input", placeholder: "exemplo@email.com" %>
+        </div>
+      </div>
+    </section>
+
+    <section class="report-form__section">
+      <div class="form-row">
+        <div class="form-field">
+          <%= f.label :categoria, "Categoria do relato" %>
+          <%= f.select :categoria, [
+            "Assédio sexual", "Assédio moral", "Discriminação", 
+            "Fraude/Contábil", "Conflito de interesses", "Outros"
+          ], { prompt: "Selecione…" }, { class: "form-select", required: true } %>
+        </div>
+        <div class="form-field">
+          <%= f.label :local, "Local/Unidade (se souber)" %>
+          <%= f.text_field :local, class: "form-input" %>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <%= f.label :descricao, "Descrição dos fatos" %>
+        <%= f.text_area :descricao, class: "form-textarea", required: true, placeholder: "Descreva com detalhes..." %>
+      </div>
+    </section>
+
+    <div class="report-form__consent">
+      <label class="checkbox-option">
+        <input type="checkbox" name="aceite" required>
+        <span>Li e aceito o <button type="button" class="link-btn" data-action="click->report#openPriv">Aviso de Privacidade</button></span>
+      </label>
+    </div>
   </div>
 
-  <div>
-    <%= form.label :nome, style: "display: block" %>
-    <%= form.text_field :nome %>
-  </div>
+  <footer class="report-form__footer">
+    <%= f.submit report.new_record? ? "Enviar relato" : "Salvar Alterações", class: "button button--primary" %>
+  </footer>
 
-  <div>
-    <%= form.label :email, style: "display: block" %>
-    <%= form.text_field :email %>
-  </div>
-
-  <div>
-    <%= form.label :categoria, style: "display: block" %>
-    <%= form.text_field :categoria %>
-  </div>
-
-  <div>
-    <%= form.label :local, style: "display: block" %>
-    <%= form.text_field :local %>
-  </div>
-
-  <div>
-    <%= form.label :descricao, style: "display: block" %>
-    <%= form.textarea :descricao %>
-  </div>
-
-  <div>
-    <%= form.label :protocolo, style: "display: block" %>
-    <%= form.text_field :protocolo %>
-  </div>
-
-  <div>
-    <%= form.submit %>
-  </div>
+  <dialog class="modal" data-report-target="privModal" id="priv-modal">
+    <div class="modal__content">
+      <h3>Aviso de Privacidade</h3>
+      <p>Seus dados são tratados com total confidencialidade conforme a LGPD.</p>
+      <button type="button" class="button" data-action="click->report#closePriv">Fechar</button>
+    </div>
+  </dialog>
 <% end %>

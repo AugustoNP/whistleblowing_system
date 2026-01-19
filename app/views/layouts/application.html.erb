@@ -1,29 +1,39 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= content_for(:title) || "Whistleblowing System" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Whistleblowing System">
-    <meta name="mobile-web-app-capable" content="yes">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+<head>
+  <title>Canal de Denúncias</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
 
-    <%= yield :head %>
+  <%# Load the standard application CSS (currently empty) %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  
+  <%# DIRECTLY load your reports CSS %>
+  <%= stylesheet_link_tag "reports", "data-turbo-track": "reload" %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-  </head>
+  <%= javascript_importmap_tags %>
+</head>
 
   <body>
-    <%= yield %>
+    <header>
+      <div class="wrap">
+        <div class="badge">Canal de Denúncias</div>
+        <h1>
+          <%= content_for?(:header_title) ? yield(:header_title) : "Fale com Segurança" %>
+        </h1>
+        <p style="opacity: 0.8; margin-top: 10px;">
+          <%= content_for?(:header_desc) ? yield(:header_desc) : "Relatos confidenciais e anônimos." %>
+        </p>
+      </div>
+    </header>
+
+    <main>
+      <%= yield %>
+    </main>
+
+    <footer style="margin: 40px 0; text-align: center; opacity: 0.5; font-size: 0.8rem;">
+      <p>© 2026 ISM GOMES DE MATTOS — Canal de Denúncias</p>
+    </footer>
   </body>
 </html>
