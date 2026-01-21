@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  report: one
+  integrante: MyString
+  agente: MyString
+  orgao: MyString
+
+two:
+  report: two
+  integrante: MyString
+  agente: MyString
+  orgao: MyString

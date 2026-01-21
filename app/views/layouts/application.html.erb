@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Canal de Denúncias</title>
+  <title>
+    <%= content_for?(:title) ? yield(:title) : "Canal de Denúncias" %> 
+    <%= " | #{@report.protocolo}" if @report&.protocolo %>
+  </title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
@@ -12,74 +15,124 @@
 </head>
 
 <body>
-  <header class="main-header">
-    <div class="wrap header-flex">
-      <div class="header-titles">
-        <span class="app-logo">Canal de Denúncias</span>
+<header class="main-header">
+  <div class="wrap header-flex">
+    
+    <div class="user-identity">
+      <div class="user-profile__avatar user-profile__avatar--<%= authenticated? ? Current.user.role : 'guest' %>">
+        <%= authenticated? ? Current.user.username[0].upcase : "V" %>
+      </div>
+      <div class="user-profile__info">
+        <span class="user-profile__name">
+          <%= authenticated? ? Current.user.username : "Visitante" %>
+        </span>
+        <span class="user-profile__role">
+          <% if authenticated? %>
+            <%= Current.user.admin? ? "Administrador" : "Analista de Diligência" %>
+          <% else %>
+            Acesso Público
+          <% end %>
+        </span>
+      </div>
+    </div>
+
+    <div class="header-titles">
+      <%= link_to root_path, style: "text-decoration: none; color: inherit; display: block;" do %>
         <h1><%= yield :header_title %></h1>
         <p><%= yield :header_desc %></p>
-      </div>
+      <% end %>
+    </div>
 
-      <nav class="header-nav" data-controller="dropdown">
-        <button class="dropdown__btn" data-action="click->dropdown#toggle" type="button">
-          <span>Menu</span>
-          <span style="font-size: 0.7rem;">▼</span>
-        </button>
-              
- <div class="dropdown__menu" data-dropdown-target="menu" hidden>
-  <div class="dropdown__header">Navegação</div>
-  
-  <%= link_to root_path, class: "dropdown__item" do %>
-    <strong>Enviar Relato</strong>
-    <small>Registrar nova ocorrência</small>
-  <% end %>
-
+    <nav class="header-nav" data-controller="dropdown">
+      <button class="dropdown__btn" data-action="click->dropdown#toggle" type="button">
+        <span>Menu</span>
+        <span style="font-size: 0.7rem;">▼</span>
+      </button>
+            
+      <div class="dropdown__menu" data-dropdown-target="menu" hidden>
+        
+        <%# Group 1: General Navigation %>
+        <div class="dropdown__group">
+          <%= link_to root_path, class: "dropdown__item" do %>
+            <strong>Início</strong>
+            <small>Programa de Integridade</small>
+          <% end %>
           <%= link_to lookup_report_path, class: "dropdown__item" do %>
             <strong>Acompanhar Relato</strong>
-            <small>Consultar status pelo protocolo</small>
+            <small>Consultar pelo protocolo</small>
           <% end %>
+        </div>
 
-          <% if authenticated? %>
-            <hr style="border: 0; border-top: 1px solid var(--border); margin: 0.5rem 0;">
-            <%= link_to reports_path, class: "dropdown__item" do %>
-              <strong>Administração</strong>
-              <small>Gerenciar relatos recebidos</small>
+        <%# Group 2: Active Forms %>
+        <div class="dropdown__group border-top">
+          <%= link_to new_report_path, class: "dropdown__item" do %>
+            <strong>Enviar Relato</strong>
+            <small>Ocorrência de Ouvidoria</small>
+          <% end %>
+          <%= link_to due_diligences_path, class: "dropdown__item" do %>
+            <strong>Due Diligence</strong>
+            <small>Questionário de Empresa</small>
+          <% end %>
+        </div>
+
+        <%# Group 3 & 4: Authenticated Actions %>
+        <% if authenticated? %>
+          <div class="dropdown__group border-top">
+            <% if Current.user.admin? %>
+              <%= link_to reports_path, class: "dropdown__item" do %>
+                <strong>Gestão de Ouvidoria</strong>
+                <small>Gerenciar relatos anônimos</small>
+              <% end %>
             <% end %>
-            
-            <div class="dropdown__header">Sessão</div>
-            
-            <%= button_to session_path, 
-                method: :delete, 
-                class: "dropdown__item", 
-                style: "width: 100%; text-align: left; background: none; border: none; cursor: pointer; display: block;" do %>
+
+            <% if Current.user.admin? || Current.user.diligence? %>
+              <%= link_to diligence_index_reports_path, class: "dropdown__item" do %>
+                <% if Current.user.admin? %>
+                  <strong>Visualizar Diligência</strong>
+                  <small>Consulta de questionários (Leitura)</small>
+                <% else %>
+                  <strong>Gestão de Diligência</strong>
+                  <small>Analisar empresas cadastradas</small>
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+          
+          <div class="dropdown__group border-top">
+            <%= button_to session_path, method: :delete, class: "dropdown__item", style: "width: 100%; text-align: left; background: none; border: none; cursor: pointer; display: block;" do %>
               <strong style="color: #dc2626;">Encerrar Sessão</strong>
-              <small>Sair da conta de <%= Current.user.username %></small>
+              <small>Sair como <%= Current.user.username %></small>
             <% end %>
-          <% else %>
+          </div>
+
+        <% else %>
+          <%# Group 5: Guest Login %>
+          <div class="dropdown__group border-top">
             <%= link_to new_session_path, class: "dropdown__item" do %>
               <strong>Login Administrativo</strong>
               <small>Acesso para membros da empresa</small>
             <% end %>
-          <% end %>
-        </div>
-      </nav>
+          </div>
+        <% end %>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <% if flash[:notice] %>
+    <div class="badge badge--resolvido" style="width: 100%; margin-bottom: 1rem; padding: 1rem; border-radius: 8px;">
+      <%= flash[:notice] %>
     </div>
-  </header>
+  <% end %>
+  
+  <% if flash[:alert] %>
+    <div class="report-form__feedback" style="margin-bottom: 1rem; background-color: #fef2f2; border: 1px solid #f87171; color: #991b1b; padding: 1rem; border-radius: 8px;">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
 
-  <main class="wrap">
-    
-    <% if flash[:notice] %>
-      <div class="badge badge--resolvido" style="width: 100%; margin-bottom: 1rem; padding: 1rem;">
-        <%= flash[:notice] %>
-      </div>
-    <% end %>
-    <% if flash[:alert] %>
-      <div class="report-form__feedback" style="margin-bottom: 1rem;">
-        <%= flash[:alert] %>
-      </div>
-    <% end %>
-
-    <%= yield %>
-  </main>
+  <%= yield %>
+</main>
 </body>
 </html>

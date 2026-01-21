@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  report: one
+  tipo: MyString
+  orgao: MyString
+  validade: 2026-01-21
+
+two:
+  report: two
+  tipo: MyString
+  orgao: MyString
+  validade: 2026-01-21

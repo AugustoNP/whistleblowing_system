@@ -1,0 +1,24 @@
+<% if collection.any? %>
+  <h3 class="section-subtitle"><%= title %></h3>
+  <table class="report-table">
+    <thead>
+      <tr>
+        <% columns.each do |col| %>
+          <th><%= col %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% collection.each do |item| %>
+        <tr>
+          <% fields.each do |field| %>
+            <td>
+              <% val = item.send(field) %>
+              <%= val.is_a?(Date) ? val.strftime("%d/%m/%Y") : val %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

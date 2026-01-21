@@ -1,0 +1,49 @@
+class AddDueDiligenceToReports < ActiveRecord::Migration[8.1]
+  def change
+    add_column :reports, :razao_social, :string
+    add_column :reports, :cnpj, :string
+    add_column :reports, :nome_fantasia, :string
+    add_column :reports, :website, :string
+    add_column :reports, :endereco, :string
+    add_column :reports, :data_const, :date
+    add_column :reports, :porte, :string
+    add_column :reports, :n_func, :integer
+    add_column :reports, :objeto, :text
+    add_column :reports, :paises, :string
+    add_column :reports, :r_nome, :string
+    add_column :reports, :r_email, :string
+    add_column :reports, :r_cargo, :string
+    add_column :reports, :ubo_txt, :text
+    add_column :reports, :i_pub, :string
+    add_column :reports, :i_pub_txt, :text
+    add_column :reports, :pep, :string
+    add_column :reports, :par, :string
+    add_column :reports, :rel_emp, :string
+    add_column :reports, :rel_emp_txt, :text
+    add_column :reports, :conf_int, :text
+    add_column :reports, :restr, :string
+    add_column :reports, :restr_txt, :text
+    add_column :reports, :c_cod, :string
+    add_column :reports, :c_cod_url, :string
+    add_column :reports, :c_pac, :string
+    add_column :reports, :c_pac_url, :string
+    add_column :reports, :c_prog, :string
+    add_column :reports, :c_prog_url, :string
+    add_column :reports, :c_bri, :string
+    add_column :reports, :c_bri_url, :string
+    add_column :reports, :c_ddt, :string
+    add_column :reports, :c_ddt_desc, :string
+    add_column :reports, :c_can, :string
+    add_column :reports, :c_can_cont, :string
+    add_column :reports, :anon_ret, :boolean
+    add_column :reports, :c_trein, :string
+    add_column :reports, :c_mon, :string
+    add_column :reports, :c_mon_desc, :string
+    add_column :reports, :cert_basic, :text
+    add_column :reports, :t_usa, :string
+    add_column :reports, :t_claus, :string
+    add_column :reports, :a_nome, :string
+    add_column :reports, :a_cargo, :string
+    add_column :reports, :a_data, :date
+  end
+end

@@ -25,39 +25,68 @@ body {
 .main-header {
   background-color: var(--primary);
   color: white;
-  padding: 3rem 0 8rem 0; /* Increased bottom padding */
+  padding: 3rem 0 8rem 0; /* Creates the blue "hero" area height */
   width: 100vw;
   position: relative;
   left: 50%;
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
-  margin-bottom: -5rem; /* Slightly reduced overlap */
+  margin-bottom: -5rem; /* Allows the cards to overlap the blue */
 }
-.header-flex {
-  display: flex;
-  justify-content: space-between;
+
+.main-header .wrap.header-flex {
+  display: grid !important;
+  /* Balanced columns: side areas are identical, middle takes what it needs */
+  grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
   align-items: center;
+  gap: 1.5rem;
+  max-width: 900px; /* Matches your card width */
+  margin: 0 auto;
+  padding: 1rem 20px;
+}
+
+.user-identity {
+  justify-self: start; /* Pins Profile to left edge */
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-titles {
+  grid-column: 2;
+  text-align: center;
+  min-width: 0;
 }
 
 .header-titles h1 {
   margin: 0;
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 2rem; 
+  font-weight: 900;
+  line-height: 1.1; /* Fixes weird spacing on wrapped titles */
+  letter-spacing: -0.02em;
 }
 
 .header-titles p {
-  margin: 0.5rem 0 0 0;
-  opacity: 0.8;
-  font-size: 1rem;
+  margin: 0.25rem 0 0 0;
+  font-size: 0.95rem;
+  opacity: 0.85;
 }
 
+.header-nav {
+  justify-self: end;
+  display: flex;
+  position: relative;
+  align-items: center;
+}
 /* ==========================================================================
    POLISHED DROPDOWN NAV
    ========================================================================== */
-.header-nav {
-  position: relative;
-}
+
+
+
+
+
 
 .dropdown__btn {
   background: rgba(255, 255, 255, 0.15);
@@ -455,25 +484,50 @@ label,
 /* ==========================================================================
    9. PRINT STYLES
    ========================================================================== */
+.print-only-header { display: none; }
+
 @media print {
+  /* 1. Reset Page */
+  @page { margin: 0.5cm; size: A4; }
+  
+  /* 2. Toggle UI Visibility */
+  .no-print, header.card__header, footer.card__footer, .button { display: none !important; }
+  .print-only-header { display: flex !important; justify-content: space-between; border-bottom: 2px solid #0047bb; padding-bottom: 5px; margin-bottom: 10px; }
 
-    .button,
-    .card__footer,
-    header nav {
-        display: none !important;
-    }
+  body { font-size: 8pt !important; line-height: 1.0; color: #000; background: white !important; }
 
-    body {
-        background: white;
-        padding: 0;
-    }
+  /* 3. Consistency Fix: Blue Section Headers */
+  .report-details__section-title, .pdf-tables-container h3, .report-table-title {
+    background: #0047bb !important;
+    color: white !important;
+    font-size: 8.5pt !important;
+    padding: 3px 10px !important;
+    margin: 8px 0 0 0 !important;
+    text-transform: uppercase;
+    -webkit-print-color-adjust: exact;
+  }
 
-    .card {
-        border: none;
-        box-shadow: none;
-        padding: 0;
-    }
+  /* 4. Table Density */
+  .pdf-table-fixed, .report-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed;
+    margin-bottom: 0 !important;
+  }
+
+  .pdf-table-fixed td, .report-table td, .report-table th {
+    border: 1px solid #ddd !important;
+    padding: 3px 6px !important;
+    vertical-align: top;
+  }
+
+  .matrix-table th { background: #f8f8f8 !important; font-size: 7pt; text-align: left; }
+  .text-center { text-align: center; }
+
+  .pdf-label { font-size: 6.5pt !important; color: #555 !important; text-transform: uppercase; font-weight: bold; display: block; }
+  .pdf-value { font-size: 8.5pt !important; font-weight: 500; }
 }
+
 
 form.inline {
   display: inline-block;
@@ -501,4 +555,113 @@ form.inline {
   background-color: #fee2e2;
   color: #991b1b;
   border-color: #fecaca;
+}
+
+/* Styling inputs specifically when inside a data-table */
+.data-table .form-input {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    margin: 4px 0;
+}
+
+/* Ensure the fieldset legends look like your other card headers */
+.report-form__group legend {
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.form-input--error {
+  border-color: #e74c3c !important;
+  background-color: #fdf2f2;
+}
+
+.error-msg {
+  color: #e74c3c;
+  font-size: 0.75rem;
+  display: block;
+  margin-top: 4px;
+  font-weight: bold;
+}
+
+/* Avatar Styling - Professional Blue Palette */
+.user-profile__avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 900; /* Increased to 900 to prevent 'thin' look on blue */
+  font-size: 1.2rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+
+.user-profile__avatar--admin { background-color: #2563eb; }
+.user-profile__avatar--diligence { background-color: #334155; }
+.user-profile__avatar--guest { background-color: #94a3b8; }
+
+.user-profile__info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-profile__name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+.user-profile__role {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.password-eye-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.password-eye-btn:hover {
+  color: #0047bb;
+}
+
+#password-field {
+  padding-right: 45px; /* Ensures text doesn't go under the icon */
+}
+
+/* Hide the default eye icon in Edge/IE */
+#password-field::-ms-reveal,
+#password-field::-ms-clear {
+  display: none;
+}
+
+.form-control#user_password {
+  padding-right: 45px !important;
 }

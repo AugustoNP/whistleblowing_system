@@ -1,0 +1,83 @@
+<% if Current.user.admin? %>
+  <% content_for :header_title, "Visualizar Diligência" %>
+  <% content_for :header_desc, "Consulta de questionários de conformidade (Acesso de Leitura)." %>
+<% else %>
+  <% content_for :header_title, "Gestão de Diligência" %>
+  <% content_for :header_desc, "Análise e monitoramento de questionários de integridade recebidos." %>
+<% end %>
+
+<article class="card" style="margin-top: -3rem; position: relative; z-index: 10;">
+  <header class="card__header">
+    <h2 class="card__title">Questionários Recebidos</h2>
+  </header>
+
+  <div class="card__table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>CNPJ</th>
+          <th>Data de Envio</th>
+          <th>Status</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @reports.each do |report| %>
+          <%# The ID below is essential for the Turbo Stream update to prevent card shifting %>
+          <tr id="report_<%= report.id %>" style="height: 60px;">
+            <td><strong><%= report.razao_social %></strong></td>
+            <td><%= report.cnpj %></td>
+            <td><%= report.created_at.strftime("%d/%m/%Y") %></td>
+            
+            <td>
+              <% if Current.user.diligence? %>
+                <%= form_with url: update_status_report_path(report), method: :patch, class: "inline-form" do |f| %>
+                  <%= f.select :status, 
+                      Report.statuses.keys.map { |s| [s.humanize, s] }, 
+                      { selected: report.status }, 
+                      { 
+                        class: "badge badge--#{report.status}", 
+                        onchange: "this.form.requestSubmit()",
+                        style: "cursor: pointer; border: none; font-family: inherit; appearance: none; -webkit-appearance: none; width: 100%; text-align: center;" 
+                      } %>
+                <% end %>
+              <% else %>
+                <span class="badge badge--<%= report.status %>">
+                  <%= report.status.humanize %>
+                </span>
+              <% end %>
+            </td>
+
+            <td class="text-right">
+              <div class="action-group">
+                <%# PDF Action: Opens the print-optimized 'show' view %>
+                <%= link_to "PDF", report_path(report, print: true), class: "link-action", target: "_blank" %>
+                
+                <% if Current.user.admin? %>
+                  <%= link_to "Ver", report, class: "link-action" %>
+                <% else %>
+                  <%= link_to "Analisar", edit_report_path(report), class: "link-action" %>
+                  <%= button_to "Excluir", report, method: :delete, 
+                      form: { style: "display:inline-block;" }, 
+                      data: { turbo_confirm: "Tem certeza que deseja excluir este registro?" }, 
+                      class: "link-delete" %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</article>
+
+<%# Script to auto-trigger print dialog if 'print=true' is in URL %>
+<script>
+  document.addEventListener("turbo:load", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('print')) {
+      window.print();
+    }
+  });
+</script>

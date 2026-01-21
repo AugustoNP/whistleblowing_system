@@ -1,57 +1,102 @@
-<% content_for :header_title, "Detalhes do Relato" %>
-<% content_for :header_desc, "Visualizando o protocolo: #{@report.protocolo}" %>
+<% content_for :header_title, "Visualização de Registro" %>
+<% content_for :header_desc, "Protocolo: #{@report.protocolo}" %>
+
+<%# 1. PRINT-ONLY HEADER (Hidden on web) %>
+<div class="print-only-header">
+  <div class="print-header-left">
+    <strong>DUE DILIGENCE: <%= @report.razao_social %></strong>
+    <br><small>Protocolo: <%= @report.protocolo %> | <%= @report.created_at.strftime("%d/%m/%Y") %></small>
+  </div>
+</div>
 
 <article class="card">
-  <header class="card__header card__header--split">
-    <h2 class="card__title">Detalhes do Relato</h2>
+  <%# Restore the Web UI Header %>
+  <header class="card__header card__header--split no-print">
+    <h2 class="card__title">Questionário de Due Diligence</h2>
     <span class="badge badge--protocol">Protocolo: <%= @report.protocolo %></span>
   </header>
 
   <section class="report-details">
-    <div class="report-details__grid">
-      <div class="detail-item">
-        <label class="detail-item__label">Modo de Envio</label>
-        <p class="detail-item__value"><%= @report.modo.capitalize %></p>
-      </div>
-      <div class="detail-item">
-        <label class="detail-item__label">Categoria</label>
-        <p class="detail-item__value"><%= @report.categoria %></p>
-      </div>
-    </div>
+    <% if @report.razao_social.present? %>
+      
+      <%# --- 1. CADASTRO --- %>
+      <div class="report-details__section-title">1. Informações Cadastrais</div>
+      <table class="pdf-table-fixed">
+        <tr>
+          <td width="35%"><label class="pdf-label">Razão Social</label><div class="pdf-value"><%= @report.razao_social %></div></td>
+          <td width="30%"><label class="pdf-label">CNPJ</label><div class="pdf-value"><%= @report.cnpj %></div></td>
+          <td width="35%"><label class="pdf-label">Nome Fantasia</label><div class="pdf-value"><%= @report.nome_fantasia.presence || "N/A" %></div></td>
+        </tr>
+        <tr>
+          <td><label class="pdf-label">Website</label><div class="pdf-value"><%= @report.website.presence || "N/A" %></div></td>
+          <td colspan="2"><label class="pdf-label">Endereço</label><div class="pdf-value"><%= @report.endereco %></div></td>
+        </tr>
+      </table>
 
-    <% if @report.modo == "identificado" %>
-      <div class="report-details__highlight-box">
-        <div class="detail-item">
-          <label class="detail-item__label">Nome</label>
-          <p><%= @report.nome.presence || "Não informado" %></p>
-        </div>
-        <div class="detail-item">
-          <label class="detail-item__label">E-mail</label>
-          <p><%= @report.email.presence || "Não informado" %></p>
-        </div>
+      <%# --- 2. RESPONSÁVEL --- %>
+      <div class="report-details__section-title">2. Responsável pelo Preenchimento</div>
+      <table class="pdf-table-fixed">
+        <tr>
+          <td width="33%"><label class="pdf-label">Nome</label><div class="pdf-value"><%= @report.r_nome %></div></td>
+          <td width="33%"><label class="pdf-label">Cargo</label><div class="pdf-value"><%= @report.r_cargo %></div></td>
+          <td width="33%"><label class="pdf-label">E-mail</label><div class="pdf-value"><%= @report.r_email %></div></td>
+        </tr>
+      </table>
+
+      <%# --- 3, 4, 5. TABLES --- %>
+      <div class="pdf-tables-container">
+        <%= render "shared/report_table", title: "3. Quadro Societário", collection: @report.socios, columns: ["Nome", "Cargo", "%"], fields: [:nome, :cargo, :percent] %>
+        <%= render "shared/report_table", title: "4. Empresas Vinculadas", collection: @report.empresa_vinculadas, columns: ["Razão Social", "CNPJ", "Tipo"], fields: [:razao, :cnpj, :tipo] %>
+        <%# Fixed fields for ParticipacaoSocio %>
+        <%= render "shared/report_table", title: "5. Participação de Sócios em Outras Empresas", collection: @report.participacao_socios, columns: ["Sócio", "Empresa", "CNPJ"], fields: [:socio, :empresa, :cnpj] %>
       </div>
+
+      <%# --- 6. THE 40+ QUESTIONS MATRIX (All Yes/No) --- %>
+      <div class="report-details__section-title">6. Questionário de Compliance e Declarações</div>
+      <table class="pdf-table-fixed matrix-table">
+        <thead>
+          <tr>
+            <th width="40%">Pergunta</th><th width="10%">Resp.</th>
+            <th width="40%">Pergunta</th><th width="10%">Resp.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Possui Código de Conduta?</td><td class="text-center"><strong><%= @report.c_cod %></strong></td>
+            <td>Possui Canal de Denúncias?</td><td class="text-center"><strong><%= @report.c_can %></strong></td>
+          </tr>
+          <tr>
+            <td>Realiza Treinamentos de Ética?</td><td class="text-center"><strong><%= @report.c_trein %></strong></td>
+            <td>Monitoramento de Terceiros?</td><td class="text-center"><strong><%= @report.c_mon %></strong></td>
+          </tr>
+          <tr>
+            <td>Sócios ou Colaboradores são PEP?</td><td class="text-center"><strong><%= @report.peps.any? ? "SIM" : "NÃO" %></strong></td>
+            <td>Parentesco com Agentes Públicos?</td><td class="text-center"><strong><%= @report.parentescos.any? ? "SIM" : "NÃO" %></strong></td>
+          </tr>
+          <tr>
+            <td>Interação com Setor Público?</td><td class="text-center"><strong><%= @report.i_pub %></strong></td>
+            <td>Identifica Beneficiário Final (UBO)?</td><td class="text-center"><strong><%= @report.ubo %></strong></td>
+          </tr>
+          <tr>
+            <td>Possui Sanções ou Restrições?</td><td class="text-center"><strong><%= @report.restr %></strong></td>
+            <td>Possui Licenças Ativas?</td><td class="text-center"><strong><%= @report.licencas.any? ? "SIM" : "NÃO" %></strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <%# --- 7. ADDITIONAL TABLES (Licenças/PEPs) --- %>
+      <% if @report.licencas.any? %>
+        <%= render "shared/report_table", title: "7. Licenças e Autorizações", collection: @report.licencas, columns: ["Tipo", "Órgão", "Validade"], fields: [:tipo, :orgao, :validade] %>
+      <% end %>
+
     <% end %>
-
-    <div class="detail-item">
-      <label class="detail-item__label">Local/Unidade</label>
-      <p><%= @report.local.presence || "Não informado" %></p>
-    </div>
-
-    <div class="detail-item">
-      <label class="detail-item__label">Descrição dos Fatos</label>
-      <div class="detail-item__content-box">
-        <%= @report.descricao %>
-      </div>
-    </div>
   </section>
 
-  <footer class="card__footer">
-    <time class="timestamp">Relato criado em: <%= @report.created_at.strftime("%d/%m/%Y às %H:%M") %></time>
-    
+  <%# Restore Web Footer Actions %>
+  <footer class="card__footer no-print">
     <div class="card__footer-actions">
-      <%= link_to "Voltar para Lista", reports_path, class: "button button--outline" %>
-      <%= link_to "Editar Informações", edit_report_path(@report), class: "button button--secondary" %>
-      <button onclick="window.print()" class="button button--print">Imprimir PDF</button>
+      <%= link_to "Voltar", diligence_index_reports_path, class: "button button--outline" %>
+      <button onclick="window.print()" class="button button--primary">Imprimir Relato</button>
     </div>
   </footer>
 </article>
