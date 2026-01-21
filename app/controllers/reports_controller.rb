@@ -66,4 +66,8 @@ class ReportsController < ApplicationController
   def report_params
     params.expect(report: [ :modo, :nome, :email, :categoria, :local, :descricao, :protocolo, :status ])
   end
-end # Final end for the class
+
+  def integrity
+
+  end
+end 
