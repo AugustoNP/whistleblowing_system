@@ -5,9 +5,20 @@
 - [Rails\_Compliance\_System](#rails_compliance_system)
   - [Descrição.](#descrição)
   - [Entregáveis.](#entregáveis)
-  - [Especificações técnicas.](#especificações-técnicas)
-    - [Backend.](#backend)
-    - [Front-End.](#front-end)
+  - [Backend.](#backend)
+  - [Front-End.](#front-end)
+  - [Arquitetura de Segurança](#arquitetura-de-segurança)
+    - [Fluxo de Interações](#fluxo-de-interações)
+  - [Matriz de Controle de Acesso (RBAC)](#matriz-de-controle-de-acesso-rbac)
+  - [Camadas de Implementação Técnica](#camadas-de-implementação-técnica)
+    - [Escopo de Busca (Proteção contra IDOR)](#escopo-de-busca-proteção-contra-idor)
+    - [Autorização Atômica](#autorização-atômica)
+    - [Filtro de Parâmetros por Perfil (Mass Assignment)](#filtro-de-parâmetros-por-perfil-mass-assignment)
+    - [Ofuscação de Identificadores](#ofuscação-de-identificadores)
+  - [Protocolo de Validação (QA)](#protocolo-de-validação-qa)
+    - [Isolamento de Perfil](#isolamento-de-perfil)
+    - [Integridade de Status](#integridade-de-status)
+    - [Privacidade de Detalhes](#privacidade-de-detalhes)
 
 ## Descrição.
 Desenvolver a infraestrutura lógica (Back-end) para o Canal de Denúncias da ISM
@@ -26,15 +37,15 @@ acompanhamento do caso.
 - Interface: Desenvolvimento da interface de input e do Painel Administrativo.
 - Segurança : Autenticação e autorização de usuários, conformidade com a LGPD e
 proteção contra ataques web comuns.
-## Especificações técnicas.
 
-### Backend.
+
+## Backend.
 
 **Ruby on Rails**
 
 **Postgre SQL**
 
-### Front-End.
+## Front-End.
 
 **HTML**
 
@@ -45,6 +56,112 @@ proteção contra ataques web comuns.
 **Flexbox**
 
 **React**
+
+## Arquitetura de Segurança
+
+O sistema adota o modelo de **Defesa em Profundidade** para garantir a integridade dos dados e o isolamento de informações sensíveis, conforme ilustrado no fluxo de interações abaixo.
+
+---
+
+### Fluxo de Interações
+
+~~~mermaid
+graph TD
+    User((Visitante))
+    Staff((Admin / Diligência))
+
+    User --> Root[Página Inicial]
+    Root --> Whistle[Formulário de Ouvidoria /new]
+    Root --> Integrity[Pilar de Integridade /integrity]
+    Root --> Lookup[Consulta de Protocolo /lookup]
+
+    Whistle --> Create{Processar Relato}
+    Create -- Sucesso --> Root
+    Create -- Erro --> Whistle
+
+    Lookup --> Search{Validar Protocolo}
+    Search -- Sucesso --> Status[Exibir Status do Relato]
+    Search -- Falha --> Lookup
+
+    Staff --> Login[Página de Login]
+    Login --> Dash{Verificar Perfil}
+
+    Dash -- Admin --> AdminIndex[Painel de Ouvidoria /reports]
+    Dash -- Admin/Diligência --> DilIndex[Painel de Diligência /diligence_index]
+
+    DilIndex --> DilForm[Formulário de Diligência /diligence_form]
+    AdminIndex --> Show[Visualizar Registro /show]
+    DilIndex --> Show
+    
+    Show --> Edit[Editar Registro /edit]
+    Show --> StatusUpdate[Atualizar Status /update_status]
+    Show --> PDF[Gerar PDF]
+~~~
+
+---
+
+## Matriz de Controle de Acesso (RBAC)
+
+| Perfil     | Acesso Ouvidoria | Acesso Diligência | Visualização (`show`)        | Ações de Escrita              |
+|------------|------------------|-------------------|------------------------------|-------------------------------|
+| Visitante  | Não              | Não               | Não (apenas status)          | Não                           |
+| Diligência | Não              | Sim               | Sim (apenas diligência)      | Sim (apenas diligência)       |
+| Admin      | Sim              | Sim               | Sim                          | Sim                           |
+
+## Camadas de Implementação Técnica
+
+### Escopo de Busca (Proteção contra IDOR)
+
+O método `set_authorized_report` restringe a busca no banco de dados com base na sessão ativa:
+
+- **Admin**: acesso total via `Report.all`
+- **Analista de Diligência**: acesso limitado a registros onde `razao_social` não é nulo
+- **Visitante**: bloqueio total de acesso direto por ID
+
+Tentativas de acesso fora do escopo resultam em erro `ActiveRecord::RecordNotFound`, prevenindo enumeração de registros e exposição indevida de dados.
+
+---
+
+### Autorização Atômica
+
+Ações críticas, incluindo `update_status` e `destroy`, possuem validações de perfil internas ao método.
+
+Isso assegura que a autorização seja verificada no momento da execução, independentemente de verificações de rotas globais ou manipulações de interface.
+
+---
+
+### Filtro de Parâmetros por Perfil (Mass Assignment)
+
+O método `filtered_report_params` implementa permissões dinâmicas de atributos:
+
+- **Gestão (Admin)**: acesso integral aos atributos do modelo
+- **Público (Visitante)**: permissão restrita exclusivamente aos campos de entrada do relato
+
+Essa camada impede a modificação de metadados administrativos (como `status`) via injeção de parâmetros no cliente.
+
+---
+
+### Ofuscação de Identificadores
+
+A identificação pública de relatos utiliza protocolos gerados via `SecureRandom`, no formato:
+
+    CD-XXXX-XXXX
+
+O uso de identificadores não sequenciais e de alta entropia elimina o risco de descoberta de registros por força bruta ou predição de IDs incrementais.
+
+---
+
+## Protocolo de Validação (QA)
+
+### Isolamento de Perfil
+Validar que Analistas de Diligência recebem erro **404** ao tentar acessar IDs de relatos de Ouvidoria.
+
+### Integridade de Status
+Confirmar que envios via formulário público **não alteram** o campo `status` original por interceptação de requisições.
+
+### Privacidade de Detalhes
+Garantir que usuários não autenticados sejam redirecionados ao tentar acessar a rota `show` por manipulação direta da URL.
+
 
 
 

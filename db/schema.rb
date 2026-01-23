@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_21_165153) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_22_114100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -93,9 +93,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_165153) do
     t.text "descricao"
     t.string "email"
     t.string "endereco"
+    t.string "fal"
+    t.text "fal_txt"
     t.text "i_inst"
     t.string "i_pub"
     t.text "i_pub_txt"
+    t.string "imp"
+    t.text "imp_txt"
+    t.string "inv"
+    t.text "inv_txt"
     t.string "local"
     t.string "modo"
     t.integer "n_func"
