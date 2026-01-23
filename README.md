@@ -65,39 +65,49 @@ O sistema adota o modelo de **Defesa em Profundidade** para garantir a integrida
 
 ### Fluxo de Interações
 
-~~~mermaid
+```mermaid
 graph TD
-    User((Visitante))
-    Staff((Admin / Diligência))
+    %% Estilização para clareza
+    classDef actor fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef page fill:#fff,stroke:#333,stroke-width:1px;
+    classDef logic fill:#fff3e0,stroke:#ff9800;
+    classDef action fill:#e8f5e9,stroke:#2e7d32;
 
-    User --> Root[Página Inicial]
-    Root --> Whistle[Formulário de Ouvidoria /new]
-    Root --> Integrity[Pilar de Integridade /integrity]
-    Root --> Lookup[Consulta de Protocolo /lookup]
+    %% Acesso Externo
+    subgraph Portal_Publico [Portal do Cidadão / Empresa]
+        User((Visitante)):::actor --> Root[Página Inicial]:::page
+        Root --> Whistle[Fazer Denúncia]:::page
+        Root --> Lookup[Consultar Protocolo]:::page
+        Root --> Integrity[Pilar de Integridade]:::page
+    end
 
-    Whistle --> Create{Processar Relato}
-    Create -- Sucesso --> Root
-    Create -- Erro --> Whistle
+    %% Camada de Proteção
+    User -- Envia Form --> SavePublic{Sistema Salva}:::logic
+    SavePublic -->|Gera Protocolo| Root
 
-    Lookup --> Search{Validar Protocolo}
-    Search -- Sucesso --> Status[Exibir Status do Relato]
-    Search -- Falha --> Lookup
+    %% Área Administrativa
+    subgraph Area_Restrita [Painel da Equipe Interna]
+        Staff((Staff)):::actor --> Login[Login do Colaborador]:::page
+        Login --> Auth{Quem é você?}:::logic
 
-    Staff --> Login[Página de Login]
-    Login --> Dash{Verificar Perfil}
+        %% Caminhos de Visualização
+        Auth -- "Admin (Ouvidoria)" --> AdminIndex[Lista de Denúncias]:::page
+        Auth -- "Diligência" --> DilIndex[Lista de Diligências]:::page
 
-    Dash -- Admin --> AdminIndex[Painel de Ouvidoria /reports]
-    Dash -- Admin/Diligência --> DilIndex[Painel de Diligência /diligence_index]
+        %% Ações Comuns
+        AdminIndex --> Show[Ver Detalhes]:::page
+        DilIndex --> Show
+        DilIndex --> DilForm[Cadastrar Nova Diligência]:::page
 
-    DilIndex --> DilForm[Formulário de Diligência /diligence_form]
-    AdminIndex --> Show[Visualizar Registro /show]
-    DilIndex --> Show
-    
-    Show --> Edit[Editar Registro /edit]
-    Show --> StatusUpdate[Atualizar Status /update_status]
-    Show --> PDF[Gerar PDF]
-~~~
+        %% Ferramentas de Gestão
+        Show --> Status[Alterar Status / Andamento]:::action
+        Show --> Edit[Editar Dados]:::action
+        Show --> PDF[Baixar Relatório PDF]:::action
+    end
 
+    %% Conexão de Segurança
+    Lookup -.->|Apenas leitura via protocolo| Show
+```
 ---
 
 ## Matriz de Controle de Acesso (RBAC)
