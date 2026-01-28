@@ -10,88 +10,35 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_22_114100) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_28_132633) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
-  create_table "empresa_vinculadas", force: :cascade do |t|
-    t.string "cnpj"
-    t.datetime "created_at", null: false
-    t.string "razao"
-    t.bigint "report_id", null: false
-    t.string "tipo"
-    t.datetime "updated_at", null: false
-    t.index ["report_id"], name: "index_empresa_vinculadas_on_report_id"
-  end
-
-  create_table "licencas", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "orgao"
-    t.bigint "report_id", null: false
-    t.string "tipo"
-    t.datetime "updated_at", null: false
-    t.date "validade"
-    t.index ["report_id"], name: "index_licencas_on_report_id"
-  end
-
-  create_table "parentescos", force: :cascade do |t|
-    t.string "agente"
-    t.datetime "created_at", null: false
-    t.string "integrante"
-    t.string "orgao"
-    t.bigint "report_id", null: false
-    t.datetime "updated_at", null: false
-    t.index ["report_id"], name: "index_parentescos_on_report_id"
-  end
-
-  create_table "participacao_socios", force: :cascade do |t|
-    t.string "cnpj"
-    t.datetime "created_at", null: false
-    t.string "empresa"
-    t.bigint "report_id", null: false
-    t.string "socio"
-    t.datetime "updated_at", null: false
-    t.index ["report_id"], name: "index_participacao_socios_on_report_id"
-  end
-
-  create_table "peps", force: :cascade do |t|
-    t.string "cargo"
-    t.datetime "created_at", null: false
-    t.string "nome"
-    t.string "orgao"
-    t.bigint "report_id", null: false
-    t.datetime "updated_at", null: false
-    t.index ["report_id"], name: "index_peps_on_report_id"
-  end
-
-  create_table "reports", force: :cascade do |t|
+  create_table "diligences", force: :cascade do |t|
     t.string "a_cargo"
     t.date "a_data"
     t.string "a_nome"
-    t.boolean "anon_ret"
+    t.string "anon_ret"
     t.string "c_bri"
     t.string "c_bri_url"
     t.string "c_can"
-    t.string "c_can_cont"
+    t.text "c_can_cont"
     t.string "c_cod"
     t.string "c_cod_url"
     t.string "c_ddt"
-    t.string "c_ddt_desc"
+    t.text "c_ddt_desc"
     t.string "c_mon"
-    t.string "c_mon_desc"
+    t.text "c_mon_desc"
     t.string "c_pac"
     t.string "c_pac_url"
     t.string "c_prog"
     t.string "c_prog_url"
     t.string "c_trein"
-    t.string "categoria"
-    t.text "cert_basic"
+    t.string "cert_basic"
     t.string "cnpj"
     t.text "conf_int"
     t.datetime "created_at", null: false
     t.date "data_const"
-    t.text "descricao"
-    t.string "email"
     t.string "endereco"
     t.string "fal"
     t.text "fal_txt"
@@ -102,10 +49,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_22_114100) do
     t.text "imp_txt"
     t.string "inv"
     t.text "inv_txt"
-    t.string "local"
-    t.string "modo"
     t.integer "n_func"
-    t.string "nome"
     t.string "nome_fantasia"
     t.text "objeto"
     t.text "oc"
@@ -124,12 +68,76 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_22_114100) do
     t.string "restr"
     t.text "restr_txt"
     t.integer "status"
-    t.string "t_claus"
-    t.string "t_usa"
+    t.boolean "t_claus"
+    t.boolean "t_usa"
     t.string "ubo"
     t.text "ubo_txt"
     t.datetime "updated_at", null: false
     t.string "website"
+  end
+
+  create_table "empresa_vinculadas", force: :cascade do |t|
+    t.string "cnpj"
+    t.datetime "created_at", null: false
+    t.bigint "diligence_id", null: false
+    t.string "razao"
+    t.string "tipo"
+    t.datetime "updated_at", null: false
+    t.index ["diligence_id"], name: "index_empresa_vinculadas_on_diligence_id"
+  end
+
+  create_table "licencas", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "diligence_id", null: false
+    t.string "orgao"
+    t.string "tipo"
+    t.datetime "updated_at", null: false
+    t.date "validade"
+    t.index ["diligence_id"], name: "index_licencas_on_diligence_id"
+  end
+
+  create_table "parentescos", force: :cascade do |t|
+    t.string "agente"
+    t.datetime "created_at", null: false
+    t.bigint "diligence_id", null: false
+    t.string "integrante"
+    t.string "orgao"
+    t.datetime "updated_at", null: false
+    t.index ["diligence_id"], name: "index_parentescos_on_diligence_id"
+  end
+
+  create_table "participacao_socios", force: :cascade do |t|
+    t.string "cnpj"
+    t.datetime "created_at", null: false
+    t.bigint "diligence_id", null: false
+    t.string "empresa"
+    t.string "socio"
+    t.datetime "updated_at", null: false
+    t.index ["diligence_id"], name: "index_participacao_socios_on_diligence_id"
+  end
+
+  create_table "peps", force: :cascade do |t|
+    t.string "cargo"
+    t.datetime "created_at", null: false
+    t.bigint "diligence_id", null: false
+    t.string "nome"
+    t.string "orgao"
+    t.datetime "updated_at", null: false
+    t.index ["diligence_id"], name: "index_peps_on_diligence_id"
+  end
+
+  create_table "reports", force: :cascade do |t|
+    t.string "categoria"
+    t.datetime "created_at", null: false
+    t.text "descricao"
+    t.string "email"
+    t.string "local"
+    t.string "modo"
+    t.string "nome"
+    t.text "oc_txt"
+    t.string "protocolo"
+    t.integer "status"
+    t.datetime "updated_at", null: false
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -144,21 +152,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_22_114100) do
   create_table "socios", force: :cascade do |t|
     t.string "cargo"
     t.datetime "created_at", null: false
+    t.bigint "diligence_id", null: false
     t.string "nome"
     t.decimal "percent"
-    t.bigint "report_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["report_id"], name: "index_socios_on_report_id"
+    t.index ["diligence_id"], name: "index_socios_on_diligence_id"
   end
 
   create_table "terceiros", force: :cascade do |t|
     t.string "atividade"
     t.string "cnpj"
     t.datetime "created_at", null: false
+    t.bigint "diligence_id", null: false
     t.string "razao"
-    t.bigint "report_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["report_id"], name: "index_terceiros_on_report_id"
+    t.index ["diligence_id"], name: "index_terceiros_on_diligence_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -172,12 +180,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_22_114100) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
-  add_foreign_key "empresa_vinculadas", "reports"
-  add_foreign_key "licencas", "reports"
-  add_foreign_key "parentescos", "reports"
-  add_foreign_key "participacao_socios", "reports"
-  add_foreign_key "peps", "reports"
+  add_foreign_key "empresa_vinculadas", "diligences"
+  add_foreign_key "licencas", "diligences"
+  add_foreign_key "parentescos", "diligences"
+  add_foreign_key "participacao_socios", "diligences"
+  add_foreign_key "peps", "diligences"
   add_foreign_key "sessions", "users"
-  add_foreign_key "socios", "reports"
-  add_foreign_key "terceiros", "reports"
+  add_foreign_key "socios", "diligences"
+  add_foreign_key "terceiros", "diligences"
 end

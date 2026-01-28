@@ -8,7 +8,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
-
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   <%= stylesheet_link_tag "reports", "data-turbo-track": "reload" %>
   <%= javascript_importmap_tags %>
@@ -51,7 +50,7 @@
             
       <div class="dropdown__menu" data-dropdown-target="menu" hidden>
         
-        <%# Group 1: General Navigation %>
+        <%# Grupo 1: Público %>
         <div class="dropdown__group">
           <%= link_to root_path, class: "dropdown__item" do %>
             <strong>Início</strong>
@@ -61,23 +60,21 @@
             <strong>Acompanhar Relato</strong>
             <small>Consultar pelo protocolo</small>
           <% end %>
-        </div>
-
-        <%# Group 2: Active Forms %>
-        <div class="dropdown__group border-top">
           <%= link_to new_report_path, class: "dropdown__item" do %>
             <strong>Enviar Relato</strong>
             <small>Ocorrência de Ouvidoria</small>
           <% end %>
-          <%= link_to due_diligences_path, class: "dropdown__item" do %>
-            <strong>Due Diligence</strong>
-            <small>Questionário de Empresa</small>
-          <% end %>
         </div>
 
-        <%# Group 3 & 4: Authenticated Actions %>
+        <%# Grupos Restritos: Somente para Usuários Autenticados %>
         <% if authenticated? %>
           <div class="dropdown__group border-top">
+            <%# Due Diligence movido para cá para esconder de visitantes %>
+            <%= link_to due_diligences_path, class: "dropdown__item" do %>
+              <strong>Due Diligence</strong>
+              <small>Questionário de Empresa</small>
+            <% end %>
+
             <% if Current.user.admin? %>
               <%= link_to reports_path, class: "dropdown__item" do %>
                 <strong>Gestão de Ouvidoria</strong>
@@ -106,7 +103,6 @@
           </div>
 
         <% else %>
-          <%# Group 5: Guest Login %>
           <div class="dropdown__group border-top">
             <%= link_to new_session_path, class: "dropdown__item" do %>
               <strong>Login Administrativo</strong>

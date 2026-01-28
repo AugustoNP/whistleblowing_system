@@ -1,27 +1,32 @@
 Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
-  
-  resources :reports do
-    member do
-      patch :update_status
-    end
 
-    collection do
-      get :diligence_index # The Compliance Dashboard (Admin/Diligence Only)
-      get :lookup          # The Protocol tracking page
-    end
+  # --- Whistleblowing (Relatos) ---
+  resources :reports do
+    member { patch :update_status }
+    collection { get :lookup }
   end
 
-  # Health check
-  get "up" => "rails/health#show", as: :rails_health_check
+  # --- Due Diligence ---
+  resources :diligences do
+    member { patch :update_status }
+    # This keeps your existing URL /reports/diligence_index working if needed, 
+    # but it's better to move it to a dedicated index.
+  end
 
-  # Public facing landing pages and forms
+  # The Admin Hub
+  resources :admin_hub, only: [:index, :edit, :update, :destroy]
+
+  # The Diligence section
+  resources :diligences
+
+  # Public paths (Keep these the same so your links don't break)
   get "consultar", to: "reports#lookup", as: :lookup_report
-  get 'integrity', to: 'reports#integrity'
-  get 'diligence_form', to: 'reports#diligence_form', as: :due_diligences
-  
-  # Root points to the general landing page (Integrity) 
-  # rather than just the whistleblowing form, providing better context.
-  root "reports#integrity" 
+  get "integrity", to: "reports#integrity"
+  # Change this to point to the new DiligencesController
+  get "diligence_form", to: "diligences#new", as: :due_diligences
+
+
+  root "reports#integrity"
 end

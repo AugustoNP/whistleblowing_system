@@ -1,3 +1,3 @@
 class Terceiro < ApplicationRecord
-  belongs_to :report
+  belongs_to :diligence
 end

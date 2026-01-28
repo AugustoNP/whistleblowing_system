@@ -1,7 +1,7 @@
-# Preview all emails at http://localhost:3000/rails/mailers/passwords_mailer
 class PasswordsMailerPreview < ActionMailer::Preview
-  # Preview this email at http://localhost:3000/rails/mailers/passwords_mailer/reset
   def reset
-    PasswordsMailer.reset(User.take)
+    # Use the first user in your database for the preview
+    user = User.first || User.new(username: "testuser", email_address: "test@example.com")
+    PasswordsMailer.reset(user)
   end
 end

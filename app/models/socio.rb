@@ -1,3 +1,3 @@
 class Socio < ApplicationRecord
-  belongs_to :report
+  belongs_to :diligence
 end

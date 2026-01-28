@@ -1,9 +1,22 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+puts "Syncing system users..."
+
+users_data = [
+  { username: 'admin',      email_address: 'adminuser@gmail.com',      password: 'adminuser123', role: :admin },
+  { username: 'diligence',  email_address: 'diligenceuser@gmail.com',  password: 'diligenceuser123', role: :diligence },
+  { username: 'rh',         email_address: 'rhuser@gmail.com',         password: 'rhuser123', role: :rh }
+]
+
+users_data.each do |data|
+  user = User.find_or_initialize_by(email_address: data[:email_address])
+  user.username = data[:username]
+  user.password = data[:password]
+  user.role     = data[:role]
+  
+  if user.save
+    puts "Verified/Created: #{user.username} as #{user.role}"
+  else
+    puts "Failed to create #{data[:username]}: #{user.errors.full_messages.join(', ')}"
+  end
+end
+
+puts "Seed sync complete!"

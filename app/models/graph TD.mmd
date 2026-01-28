@@ -1,0 +1,78 @@
+graph TD
+    %% Dark Mode High-Contrast Theme
+    classDef visitor fill:#38bdf8,stroke:#0ea5e9,color:#000,stroke-width:2px;
+    classDef admin fill:#fb7185,stroke:#e11d48,color:#000,stroke-width:2px;
+    classDef dilig fill:#4ade80,stroke:#16a34a,color:#000,stroke-width:2px;
+    classDef page fill:#1e293b,stroke:#94a3b8,stroke-width:2px,color:#f8fafc;
+    classDef logic fill:#334155,stroke:#94a3b8,stroke-dasharray: 5 5,color:#cbd5e1;
+    classDef db fill:#0f172a,stroke:#38bdf8,color:#38bdf8,stroke-width:2px;
+
+    subgraph Card [ARQUITETURA DE SEGURANÇA E FLUXO DE DADOS]
+        direction TB
+
+        subgraph Usuarios [1. ATORES E PERMISSÕES]
+            direction LR
+            V((Visitante)):::visitor
+            A((Admin)):::admin
+            D((Diligencia)):::dilig
+        end
+
+        subgraph Interfaces [2. PONTOS DE ACESSO]
+            direction LR
+            subgraph Portal [Portal Publico]
+                NewRelato[Fazer Denuncia]:::page
+                TrackRelato[Consultar Protocolo]:::page
+            end
+            subgraph Painel [Painel Interno]
+                Auth{RBAC Gate}:::logic
+                Dashboard[Gestao de Reports]:::page
+            end
+        end
+
+        subgraph Logica [3. REGRAS DE NEGOCIO]
+            direction LR
+            GenProto[before_validation]:::logic
+            NestedAttr[nested_attributes]:::logic
+            StatusEnum[enum: status]:::logic
+        end
+
+        subgraph Dados [4. CAMADA DE DADOS]
+            direction LR
+            TableReports[(Table: reports)]:::db
+            TableNested[(Entidades Vinculadas)]:::db
+        end
+
+        %% VISITOR (Blue)
+        V --> NewRelato
+        V --> TrackRelato
+        NewRelato --> GenProto
+        GenProto --> TableReports
+        TrackRelato -.-> TableReports
+
+        %% ADMIN (Pink)
+        A --> Auth
+        Auth -- "admin" --> Dashboard
+        Dashboard --> StatusEnum
+        StatusEnum --> TableReports
+        A --> NewRelato
+
+        %% DILIGENCE (Green)
+        D --> Auth
+        Auth -- "diligence" --> Dashboard
+        Dashboard --> NestedAttr
+        NestedAttr --> TableNested
+    end
+
+    style Card fill:#0f172a,stroke:#334155,stroke-width:4px,color:#f8fafc
+    style Usuarios fill:none,stroke:none
+    style Interfaces fill:#1e293b,stroke:#334155
+    style Logica fill:#0f172a,stroke:#334155
+    style Dados fill:#111827,stroke:#38bdf8
+
+    %% --- Final Corrected Arrow Coloring ---
+    %% Visitor: Blue (Indices 0,1,2,3,4)
+    linkStyle 0,1,2,3,4 stroke:#38bdf8,stroke-width:3px
+    %% Admin: Pink (Indices 5,6,7,8,9)
+    linkStyle 5,6,7,8,9 stroke:#fb7185,stroke-width:3px
+    %% Diligence: Green (Indices 10,11,12,13)
+    linkStyle 10,11,12,13 stroke:#4ade80,stroke-width:3px
