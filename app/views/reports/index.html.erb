@@ -38,12 +38,7 @@
 
       <td class="text-right">
         <div class="action-group">
-          <%= link_to "Ver", report, class: "link-action" %>
           <%= link_to "Editar", edit_report_path(report), class: "link-action" %>
-          <%= button_to "Excluir", report, method: :delete, 
-              form: { style: "display:inline-block;" }, 
-              data: { turbo_confirm: "Tem certeza que deseja excluir permanentemente este relato?" }, 
-              class: "link-delete" %>
         </div>
       </td>
     </tr>

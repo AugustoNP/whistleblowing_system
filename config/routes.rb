@@ -1,32 +1,33 @@
 Rails.application.routes.draw do
+  # Authentication (Rails 8 defaults)
   resource :session
   resources :passwords, param: :token
 
-  # --- Whistleblowing (Relatos) ---
+  # Whistleblowing (Relatos)
   resources :reports do
-    member { patch :update_status }
-    collection { get :lookup }
+    member do
+      # Dedicated route for toggling status in the dashboard
+      patch :update_status
+    end
+    collection do
+      get :lookup    # The page where users enter their protocol
+      get :integrity # The public landing page
+    end
   end
 
-  # --- Due Diligence ---
+  # Due Diligence (Gestão de Diligência)
   resources :diligences do
-    member { patch :update_status }
-    # This keeps your existing URL /reports/diligence_index working if needed, 
-    # but it's better to move it to a dedicated index.
+    member do
+      # Dedicated route for toggling status in the management table
+      patch :update_status
+    end
   end
 
-  # The Admin Hub
-  resources :admin_hub, only: [:index, :edit, :update, :destroy]
+  namespace :admin do
+    resources :users
+    get 'dashboard', to: 'dashboard#index'
+  end
 
-  # The Diligence section
-  resources :diligences
-
-  # Public paths (Keep these the same so your links don't break)
-  get "consultar", to: "reports#lookup", as: :lookup_report
-  get "integrity", to: "reports#integrity"
-  # Change this to point to the new DiligencesController
-  get "diligence_form", to: "diligences#new", as: :due_diligences
-
-
+  # Root path points to the Public Integrity Landing Page
   root "reports#integrity"
 end

@@ -1,0 +1,264 @@
+<% content_for :header_title, "Análise de Due Diligence" %>
+<% content_for :header_desc, "Protocolo: #{@diligence.protocolo} | Empresa: #{@diligence.razao_social}" %>
+
+<article class="card" data-controller="due-diligence">
+  <header class="card__header card__header--split">
+    <h2 class="card__title">Revisão e Gestão de Questionário</h2>
+    <div class="card__header-meta">
+      <span class="badge badge--protocol"><%= @diligence.protocolo %></span>
+      <span class="badge badge--status-<%= @diligence.status %>">Status: <%= @diligence.status.humanize %></span>
+    </div>
+  </header>
+
+    <%= form_with(model: @diligence, class: "report-form") do |f| %>
+    
+    <%# --- ADMINISTRATIVE CONTROLS --- %>
+    <fieldset class="report-form__group report-form__group--admin-highlight" style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+      <legend class="card__title" style="color: #1e293b;">Controle Administrativo</legend>
+      <div class="form-row">
+        <div class="form-field">
+        <%= f.label :status, "Alterar Status da Análise" %>
+
+        <%= f.select :status, Diligence.statuses.keys.map { |s| [s.humanize, s] }, {}, class: "form-select" %>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="report-form__body">
+      
+      <%# 1) IDENTIFICAÇÃO %>
+      <fieldset class="report-form__group">
+        <legend class="card__title">1) Identificação da empresa</legend>
+        <div class="form-row">
+          <div class="form-field"><%= f.label :razao_social, "Razão social" %><%= f.text_field :razao_social, class: "form-input" %></div>
+          <div class="form-field"><%= f.label :cnpj, "CNPJ" %><%= f.text_field :cnpj, class: "form-input", data: { action: "blur->due-diligence#validateCNPJ" } %></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><%= f.label :nome_fantasia %><%= f.text_field :nome_fantasia, class: "form-input" %></div>
+          <div class="form-field"><%= f.label :website %><%= f.url_field :website, class: "form-input" %></div>
+        </div>
+        <div class="form-field"><%= f.label :endereco, "Endereço da sede" %><%= f.text_field :endereco, class: "form-input" %></div>
+        <div class="form-row">
+          <div class="form-field"><%= f.label :data_const, "Data de constituição" %><%= f.date_field :data_const, class: "form-input" %></div>
+          <div class="form-field"><%= f.label :porte %><%= f.select :porte, ["MEI", "ME", "EPP", "Médio", "Grande"], {}, class: "form-select" %></div>
+          <div class="form-field"><%= f.label :n_func, "Nº empregados" %><%= f.number_field :n_func, class: "form-input" %></div>
+        </div>
+        <div class="form-field"><%= f.label :objeto, "Objeto social" %><%= f.text_area :objeto, class: "form-textarea" %></div>
+        <div class="form-field"><%= f.label :paises, "Países de atuação" %><%= f.text_field :paises, class: "form-input" %></div>
+      </fieldset>
+
+      <%# 2) ESTRUTURA SOCIETÁRIA - TABLE 1 %>
+      <fieldset class="report-form__group">
+        <legend class="card__title">2) Estrutura societária e administração</legend>
+        <div class="section-header">
+          <label class="report-form__label">11. Quadro societário e executivo</label>
+          <button type="button" class="button" data-action="click->due-diligence#addRow" data-table-id="soc-table">+ Linha</button>
+        </div>
+        <table class="data-table" id="soc-table">
+          <thead><tr><th>Nome</th><th>Cargo</th><th>%</th><th>Remover</th></tr></thead>
+          <tbody>
+            <%= f.fields_for :socios do |s| %>
+              <tr>
+                <%= s.hidden_field :id %>
+                <td><%= s.text_field :nome, class: "form-input" %></td>
+                <td><%= s.text_field :cargo, class: "form-input" %></td>
+                <td><%= s.number_field :percent, class: "form-input", step: 0.01 %></td>
+                <td style="text-align:center"><%= s.check_box :_destroy %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+
+        <%# TABLE 2: EMPRESAS VINCULADAS %>
+        <div class="section-header" style="margin-top:20px">
+          <label class="report-form__label">12. Empresas vinculadas</label>
+          <button type="button" class="button" data-action="click->due-diligence#addRow" data-table-id="vinc-table">+ Empresa</button>
+        </div>
+        <table class="data-table" id="vinc-table">
+          <thead><tr><th>Razão Social</th><th>CNPJ</th><th>Tipo</th><th>Remover</th></tr></thead>
+          <tbody>
+            <%= f.fields_for :empresa_vinculadas do |v| %>
+              <tr>
+                <%= v.hidden_field :id %>
+                <td><%= v.text_field :razao, class: "form-input" %></td>
+                <td><%= v.text_field :cnpj, class: "form-input" %></td>
+                <td><%= v.text_field :tipo, class: "form-input" %></td>
+                <td style="text-align:center"><%= v.check_box :_destroy %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+
+        <div class="form-field" style="margin-top:20px">
+          <label class="report-form__label">13. Beneficiário final (UBO)</label>
+          <%= f.text_area :ubo_txt, class: "form-textarea", placeholder: "UBOs > 25%" %>
+        </div>
+
+        <%# TABLE 3: PARTICIPAÇÕES %>
+        <div class="section-header" style="margin-top:20px">
+          <label class="report-form__label">14. Participações dos sócios em outras empresas</label>
+          <button type="button" class="button" data-action="click->due-diligence#addRow" data-table-id="part-table">+ Linha</button>
+        </div>
+        <table class="data-table" id="part-table">
+          <thead><tr><th>Sócio</th><th>Empresa</th><th>CNPJ</th><th>Remover</th></tr></thead>
+          <tbody>
+            <%= f.fields_for :participacao_socios do |p| %>
+              <tr>
+                <%= p.hidden_field :id %>
+                <td><%= p.text_field :socio, class: "form-input" %></td>
+                <td><%= p.text_field :empresa, class: "form-input" %></td>
+                <td><%= p.text_field :cnpj, class: "form-input" %></td>
+                <td style="text-align:center"><%= p.check_box :_destroy %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </fieldset>
+
+      <%# 3) SETOR PÚBLICO / PEP - TABLE 4 & 5 %>
+      <fieldset class="report-form__group">
+        <legend class="card__title">3) Relacionamento com o Setor Público / PEP</legend>
+        
+        <div class="section-header">
+          <label class="report-form__label">17. Alta administração PEP</label>
+          <button type="button" class="button" data-action="click->due-diligence#addRow" data-table-id="pep-table">+ PEP</button>
+        </div>
+        <table class="data-table" id="pep-table">
+          <thead><tr><th>Nome</th><th>Órgão</th><th>Cargo</th><th>Remover</th></tr></thead>
+          <tbody>
+            <%= f.fields_for :peps do |p| %>
+              <tr>
+                <%= p.hidden_field :id %>
+                <td><%= p.text_field :nome, class: "form-input" %></td>
+                <td><%= p.text_field :orgao, class: "form-input" %></td>
+                <td><%= p.text_field :cargo, class: "form-input" %></td>
+                <td style="text-align:center"><%= p.check_box :_destroy %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+
+        <div class="section-header" style="margin-top:20px">
+          <label class="report-form__label">18. Parentesco com agentes públicos</label>
+          <button type="button" class="button" data-action="click->due-diligence#addRow" data-table-id="par-table">+ Vínculo</button>
+        </div>
+        <table class="data-table" id="par-table">
+          <thead><tr><th>Integrante</th><th>Agente</th><th>Órgão</th><th>Remover</th></tr></thead>
+          <tbody>
+            <%= f.fields_for :parentescos do |p| %>
+              <tr>
+                <%= p.hidden_field :id %>
+                <td><%= p.text_field :integrante, class: "form-input" %></td>
+                <td><%= p.text_field :agente, class: "form-input" %></td>
+                <td><%= p.text_field :orgao, class: "form-input" %></td>
+                <td style="text-align:center"><%= p.check_box :_destroy %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </fieldset>
+
+      <%# 4) HISTÓRICO LEGAL %>
+      <fieldset class="report-form__group">
+        <legend class="card__title">4) Histórico legal e reputacional</legend>
+        <div class="form-field">
+          <label class="report-form__label">Resumo de Ocorrências e Histórico</label>
+          <%= f.text_area :oc_txt, class: "form-textarea" %>
+        </div>
+        <div class="form-field">
+          <label class="report-form__label">25. Conflitos de interesse</label>
+          <%= f.text_area :conf_int, class: "form-textarea" %>
+        </div>
+      </fieldset>
+
+      <%# 5) COMPLIANCE E INTEGRIDADE %>
+      <fieldset class="report-form__group">
+        <legend class="card__title">5) Compliance e integridade</legend>
+        <div class="form-row">
+          <div class="form-field"><%= f.label :c_cod_url, "Link Código de Ética" %><%= f.text_field :c_cod_url, class: "form-input" %></div>
+          <div class="form-field"><%= f.label :c_can_cont, "Contato Canal de Denúncias" %><%= f.text_field :c_can_cont, class: "form-input" %></div>
+        </div>
+      </fieldset>
+
+      <%# 6) LICENÇAS - TABLE 6 %>
+      <fieldset class="report-form__group">
+        <legend class="card__title">6) Licenças e conformidade</legend>
+        <div class="section-header">
+          <label class="report-form__label">36. Licenças/Alvarás</label>
+          <button type="button" class="button" data-action="click->due-diligence#addRow" data-table-id="lic-table">+ Adicionar</button>
+        </div>
+        <table class="data-table" id="lic-table">
+          <thead><tr><th>Tipo</th><th>Órgão</th><th>Validade</th><th>Remover</th></tr></thead>
+          <tbody>
+            <%= f.fields_for :licencas do |l| %>
+              <tr>
+                <%= l.hidden_field :id %>
+                <td><%= l.text_field :tipo, class: "form-input" %></td>
+                <td><%= l.text_field :orgao, class: "form-input" %></td>
+                <td><%= l.date_field :validade, class: "form-input" %></td>
+                <td style="text-align:center"><%= l.check_box :_destroy %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </fieldset>
+
+      <%# 7) TERCEIROS - TABLE 7 %>
+      <fieldset class="report-form__group">
+        <legend class="card__title">7) Terceiros e subcontratações</legend>
+        <div class="section-header">
+          <label class="report-form__label">38. Uso de terceiros</label>
+          <button type="button" class="button" data-action="click->due-diligence#addRow" data-table-id="terc-table">+ Terceiro</button>
+        </div>
+        <table class="data-table" id="terc-table">
+          <thead><tr><th>Razão</th><th>CNPJ</th><th>Atividade</th><th>Remover</th></tr></thead>
+          <tbody>
+            <%= f.fields_for :terceiros do |t| %>
+              <tr>
+                <%= t.hidden_field :id %>
+                <td><%= t.text_field :razao, class: "form-input" %></td>
+                <td><%= t.text_field :cnpj, class: "form-input" %></td>
+                <td><%= t.text_field :atividade, class: "form-input" %></td>
+                <td style="text-align:center"><%= t.check_box :_destroy %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </fieldset>
+    </div>
+
+<footer class="report-form__footer">
+  <%# This ensures you go back to the Diligence Dashboard, not the Admin/Whistleblowing list %>
+<%= link_to "Voltar para Lista", diligences_path, class: "button button--outline" %>
+  
+  <%# Only show submit button if user is NOT an admin (since Admins are read-only here) %>
+  <% unless Current.user.rh? %>
+    <%= f.submit "Salvar Alterações de Análise", class: "button button--primary" %>
+  <% end %>
+</footer>
+
+  <% end %>
+</article>
+
+<%# TEMPLATES FOR JS DYNAMIC ROWS (Same as your form) %>
+<template id="soc-table-template">
+  <tr><td><input type="text" name="diligence[socios_attributes][][nome]" class="form-input"></td><td><input type="text" name="diligence[socios_attributes][][cargo]" class="form-input"></td><td><input type="number" name="diligence[socios_attributes][][percent]" class="form-input" step="0.01"></td><td><button type="button" class="link-delete" data-action="click->due-diligence#removeRow">X</button></td></tr>
+</template>
+<template id="vinc-table-template">
+  <tr><td><input type="text" name="diligence[empresa_vinculadas_attributes][][razao]" class="form-input"></td><td><input type="text" name="diligence[empresa_vinculadas_attributes][][cnpj]" class="form-input"></td><td><input type="text" name="diligence[empresa_vinculadas_attributes][][tipo]" class="form-input"></td><td><button type="button" class="link-delete" data-action="click->due-diligence#removeRow">X</button></td></tr>
+</template>
+<template id="part-table-template">
+  <tr><td><input type="text" name="diligence[participacao_socios_attributes][][socio]" class="form-input"></td><td><input type="text" name="diligence[participacao_socios_attributes][][empresa]" class="form-input"></td><td><input type="text" name="diligence[participacao_socios_attributes][][cnpj]" class="form-input"></td><td><button type="button" class="link-delete" data-action="click->due-diligence#removeRow">X</button></td></tr>
+</template>
+<template id="pep-table-template">
+  <tr><td><input type="text" name="diligence[peps_attributes][][nome]" class="form-input"></td><td><input type="text" name="diligence[peps_attributes][][orgao]" class="form-input"></td><td><input type="text" name="diligence[peps_attributes][][cargo]" class="form-input"></td><td><button type="button" class="link-delete" data-action="click->due-diligence#removeRow">X</button></td></tr>
+</template>
+<template id="par-table-template">
+  <tr><td><input type="text" name="diligence[parentescos_attributes][][integrante]" class="form-input"></td><td><input type="text" name="diligence[parentescos_attributes][][agente]" class="form-input"></td><td><input type="text" name="diligence[parentescos_attributes][][orgao]" class="form-input"></td><td><button type="button" class="link-delete" data-action="click->due-diligence#removeRow">X</button></td></tr>
+</template>
+<template id="lic-table-template">
+  <tr><td><input type="text" name="diligence[licencas_attributes][][tipo]" class="form-input"></td><td><input type="text" name="diligence[licencas_attributes][][orgao]" class="form-input"></td><td><input type="date" name="diligence[licencas_attributes][][validade]" class="form-input"></td><td><button type="button" class="link-delete" data-action="click->due-diligence#removeRow">X</button></td></tr>
+</template>
+<template id="terc-table-template">
+  <tr><td><input type="text" name="diligence[terceiros_attributes][][razao]" class="form-input"></td><td><input type="text" name="diligence[terceiros_attributes][][cnpj]" class="form-input"></td><td><input type="text" name="diligence[terceiros_attributes][][atividade]" class="form-input"></td><td><button type="button" class="link-delete" data-action="click->due-diligence#removeRow">X</button></td></tr>
+</template>

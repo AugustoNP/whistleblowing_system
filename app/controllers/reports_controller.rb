@@ -1,10 +1,12 @@
 class ReportsController < ApplicationController
   allow_unauthenticated_access only: %i[new create lookup integrity]
   before_action :require_authentication, except: %i[new create lookup integrity]
-  before_action :set_report, only: %i[show edit update destroy update_status]
+  
+  # FIX 1: Removed :destroy
+  before_action :set_report, only: %i[show edit update update_status]
 
-  # Only Admin and RH can see the index or update reports
-  before_action :authorize_report_access!, only: %i[index update_status destroy]
+  # FIX 2: Added authorize_report_access to 'index' as well
+  before_action :authorize_report_access!, only: %i[index update_status]
 
   # GET /reports
   def index
@@ -43,15 +45,10 @@ class ReportsController < ApplicationController
   end
 
   def update
-    # PERMISSION MAPPING: Admin/RH can ONLY edit :oc_txt. Diligence cannot edit.
-    if Current.user.admin? || Current.user.rh?
-      if @report.update(params.require(:report).permit(:oc_txt))
-        redirect_to @report, notice: "Observações atualizadas."
-      else
-        render :edit, status: :unprocessable_entity
-      end
+    if @report.update(params.require(:report).permit(:status, :oc_txt))
+      redirect_to reports_path, notice: "Relato atualizado com sucesso."
     else
-      redirect_to @report, alert: "Você não tem permissão para editar observações."
+      render :edit, status: :unprocessable_entity
     end
   end
 
@@ -82,10 +79,8 @@ class ReportsController < ApplicationController
   end
 
   def authorize_report_access!
-    # Diligence users can see 'show', but shouldn't see the full 'index' of whistleblowers 
-    # unless you want them to. Based on your mapping, Admin/RH manage this area.
     unless Current.user.admin? || Current.user.rh?
-      redirect_to root_path, alert: "Acesso restrito."
+      redirect_to root_path, alert: "Acesso restrito ao RH/Administração."
     end
   end
 

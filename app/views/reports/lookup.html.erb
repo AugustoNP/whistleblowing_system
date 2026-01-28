@@ -5,7 +5,6 @@
   <%# Instructional Note to reinforce process separation %>
   <p style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; line-height: 1.4;">
     <strong>Aviso:</strong> Este canal é exclusivo para a consulta de <strong>Relatos de Ouvidoria</strong>. 
-    Protocolos de Questionários de Due Diligence não são processados por este formulário.
   </p>
 
   <% if params[:protocolo].present? && @report.nil? %>
@@ -14,7 +13,7 @@
     </div>
   <% end %>
 
-  <%= form_with url: lookup_report_path, method: :get, class: "report-form", data: { turbo: false } do |f| %>
+  <%= form_with url: lookup_reports_path, method: :get, class: "report-form", data: { turbo: false } do |f| %>
     <div class="form-field">
       <%= f.label :protocolo, "Número do Protocolo de Relato" %>
       <%= f.text_field :protocolo, 
@@ -42,7 +41,6 @@
         <strong>Última atualização:</strong> <%= @report.updated_at.strftime("%d/%m/%Y às %H:%M") %>
       </p>
 
-      <%= link_to "Ver Detalhes do Relato", report_path(@report), class: "button button--outline", style: "width: 100%; margin-top: 1.5rem; text-align: center; display: block;" %>
     </div>
   <% end %>
 </article>

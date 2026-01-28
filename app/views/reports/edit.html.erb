@@ -1,17 +1,69 @@
-<% content_for :header_title, "Painel de Edição" %>
-<% content_for :header_desc, "Alterando o protocolo: #{@report.protocolo}" %>
+<% content_for :header_title, "Análise do Relato" %>
+<% content_for :header_desc, "Protocolo: #{@report.protocolo}" %>
 
 <article class="card">
-  <header class="card__header">
-    <h2 class="card__title">Editar Informações</h2>
+  <header class="card__header card__header--split">
+    <h2 class="card__title">Informações e Apuração</h2>
+    <span class="badge badge--<%= @report.status %>"><%= @report.status.humanize %></span>
   </header>
   
   <div class="card__body">
-    <%= render "form", report: @report %>
-  </div>
+    <%= form_with(model: @report, class: "report-form") do |f| %>
+      <div class="report-form__body">
+        
+<%# SECTION 1: MATCHES THE 'NEW' FORM SPACING %>
+        <fieldset class="report-form__group">
+          <%# Row 1: Split into two columns %>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="report-form__label">Categoria do relato</label>
+              <div class="form-input" style="background: var(--bg-app); border-color: var(--border); color: var(--text-muted); display: flex; align-items: center;">
+                <%= @report.categoria %>
+              </div>
+            </div>
 
-  <footer class="card__footer card__footer--actions">
-    <%= link_to "Visualizar (Ver)", @report, class: "link-action" %>
-    <%= link_to "Voltar para Lista", reports_path, class: "link-action" %>
-  </footer>
+            <div class="form-field">
+              <label class="report-form__label">Local/Unidade (se souber)</label>
+              <div class="form-input" style="background: var(--bg-app); border-color: var(--border); color: var(--text-muted); display: flex; align-items: center;">
+                <%= @report.local.presence || "Não informado" %>
+              </div>
+            </div>
+          </div>
+
+          <%# Row 2: Full width for Description %>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="report-form__label">Descrição dos fatos</label>
+              <div class="form-textarea" style="background: var(--bg-app); border-color: var(--border); color: var(--text-muted); min-height: 150px; white-space: pre-wrap;">
+                <%= @report.descricao %>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <%# SECTION 2: RH INPUTS %>
+        <fieldset class="report-form__group">
+          <legend class="card__title" style="font-size: 1.1rem; border: none; margin-bottom: 1rem;">Apuração Interna (RH)</legend>
+          
+          <div class="form-row">
+            <div class="form-field">
+              <%= f.label :status, "Atualizar Status do Caso", class: "report-form__label" %>
+              <%= f.select :status, Report.statuses.keys.map { |s| [s.humanize, s] }, {}, class: "form-select" %>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <%= f.label :oc_txt, "Observações e Notas de Investigação", class: "report-form__label" %>
+            <%= f.text_area :oc_txt, rows: 6, class: "form-input", placeholder: "Descreva o andamento da apuração..." %>
+          </div>
+        </fieldset>
+
+      </div>
+
+      <footer class="report-form__footer" style="display: flex; gap: 1rem; align-items: center;">
+        <%= f.submit "Salvar Alterações", class: "button button--primary" %>
+        <%= link_to "Cancelar", reports_path, class: "button link-action" %>
+      </footer>
+    <% end %>
+  </div>
 </article>

@@ -1,0 +1,81 @@
+<% if Current.user.admin? %>
+  <% content_for :header_title, "Visualizar Diligência" %>
+  <% content_for :header_desc, "Consulta de questionários de conformidade (Acesso de Leitura)." %>
+<% else %>
+  <% content_for :header_title, "Gestão de Diligência" %>
+  <% content_for :header_desc, "Análise e monitoramento de questionários de integridade recebidos." %>
+<% end %>
+
+<article class="card" style="margin-top: -3rem; position: relative; z-index: 10;">
+  <header class="card__header">
+    <h2 class="card__title">Questionários Recebidos</h2>
+  </header>
+
+  <div class="card__table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>CNPJ</th>
+          <th>Data de Envio</th>
+          <th>Status</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @diligences.each do |diligence| %>
+          <tr id="diligence_<%= diligence.id %>" style="height: 60px;">
+            <td><strong><%= diligence.razao_social %></strong></td>
+            <td><%= diligence.cnpj %></td>
+            <td><%= diligence.created_at.strftime("%d/%m/%Y") %></td>
+            
+            <td>
+              <% if Current.user.diligence? %>
+                <%# We point directly to the member route update_status_diligence_path %>
+                <%= form_with url: update_status_diligence_path(diligence), method: :patch, class: "inline-form" do |f| %>
+                  <%= f.select :status, 
+                      Diligence.statuses.keys.map { |s| [s.humanize, s] }, 
+                      { selected: diligence.status }, 
+                      { 
+                        class: "badge badge--#{diligence.status}", 
+                        onchange: "this.form.requestSubmit()",
+                        style: "cursor: pointer; border: none; font-family: inherit; appearance: none; width: 100%; text-align: center;" 
+                      } %>
+                <% end %>
+              <% else %>
+                <span class="badge badge--<%= diligence.status %>">
+                  <%= diligence.status.humanize %>
+                </span>
+              <% end %>
+            </td>
+
+            <td class="text-right">
+              <div class="action-group">
+
+                
+                <% if Current.user.rh? %>
+                  <%= link_to "Ver", diligence_path(diligence), class: "link-action" %>
+                <% else %>
+                  <%= link_to "Analisar", edit_diligence_path(diligence), class: "link-action" %>
+                  <%= button_to "Excluir", diligence_path(diligence), method: :delete, 
+                      form: { style: "display:inline-block;" }, 
+                      data: { turbo_confirm: "Tem certeza que deseja excluir este registro?" }, 
+                      class: "link-delete" %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</article>
+
+<script>
+  document.addEventListener("turbo:load", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('print')) {
+      window.print();
+    }
+  });
+</script>

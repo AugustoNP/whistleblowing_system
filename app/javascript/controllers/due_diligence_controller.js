@@ -71,55 +71,39 @@ export default class extends Controller {
     }
   }
 
-  // --- Validation Logic ---
   validateCNPJ(event) {
-    const input = event.target;
-    const cnpj = input.value.replace(/[^\d]+/g, '');
-    
-    if (cnpj.length === 0) {
-        this.clearError(input);
-        return;
-    }
+  const input = event.target;
+  const cnpj = input.value.replace(/\D/g, '');
 
-    if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) {
-      this.setError(input, "CNPJ Inválido");
-      return;
-    }
-
-    // Validation algorithm
-    let size = cnpj.length - 2;
-    let numbers = cnpj.substring(0, size);
-    const digits = cnpj.substring(size);
-    let sum = 0;
-    let pos = size - 7;
-    
-    for (let i = size; i >= 1; i--) {
-      sum += numbers.charAt(size - i) * pos--;
-      if (pos < 2) pos = 9;
-    }
-    
-    let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
-    if (result != digits.charAt(0)) {
-      this.setError(input, "CNPJ Inválido");
-      return;
-    }
-
-    size = size + 1;
-    numbers = cnpj.substring(0, size);
-    sum = 0;
-    pos = size - 7;
-    for (let i = size; i >= 1; i--) {
-      sum += numbers.charAt(size - i) * pos--;
-      if (pos < 2) pos = 9;
-    }
-    result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
-    if (result != digits.charAt(1)) {
-      this.setError(input, "CNPJ Inválido");
-      return;
-    }
-
+  if (cnpj.length === 0) {
     this.clearError(input);
+    return;
   }
+
+  if (this.isValidCNPJ(cnpj)) {
+    this.clearError(input);
+  } else {
+    this.setError(input, "CNPJ Inválido (Cálculo não confere)");
+  }
+}
+
+isValidCNPJ(cnpj) {
+  if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
+
+  const calc = (slice, weights) => {
+    const sum = slice.split('').reduce((acc, digit, idx) => acc + (digit * weights[idx]), 0);
+    const res = sum % 11;
+    return res < 2 ? 0 : 11 - res;
+  };
+
+  const w1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+  const w2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+
+  const digit1 = calc(cnpj.substring(0, 12), w1);
+  const digit2 = calc(cnpj.substring(0, 13), w2);
+
+  return digit1 === parseInt(cnpj[12]) && digit2 === parseInt(cnpj[13]);
+}
 
   validatePastDate(event) {
     const input = event.target;

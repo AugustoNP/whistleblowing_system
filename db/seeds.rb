@@ -1,4 +1,4 @@
-puts "Syncing system users..."
+puts "Alinhando usuários..."
 
 users_data = [
   { username: 'admin',      email_address: 'adminuser@gmail.com',      password: 'adminuser123', role: :admin },
@@ -13,10 +13,11 @@ users_data.each do |data|
   user.role     = data[:role]
   
   if user.save
-    puts "Verified/Created: #{user.username} as #{user.role}"
+    puts "Criado: #{user.username} como #{user.role}"
   else
-    puts "Failed to create #{data[:username]}: #{user.errors.full_messages.join(', ')}"
+    puts "FALHA em criar #{data[:username]}: #{user.errors.full_messages.join(', ')}"
   end
 end
 
-puts "Seed sync complete!"
+puts "Alinhamento completo."
+
