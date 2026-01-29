@@ -97,6 +97,13 @@
                 <small>Gerenciar relatos anônimos</small>
               <% end %>
             <% end %>
+
+            <% if Current.user&.admin? %>
+            <%= link_to admin_users_path, class: "dropdown__item" do %>
+              <strong>Admin Hub</strong>
+              <small>Gerenciar Contas</small>
+            <% end %>
+          <% end %>
           </div>
           
           <div class="dropdown__group border-top">

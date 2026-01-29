@@ -1,33 +1,31 @@
 Rails.application.routes.draw do
-  # Authentication (Rails 8 defaults)
+  # Authentication
   resource :session
   resources :passwords, param: :token
 
-  # Whistleblowing (Relatos)
+  # Whistleblowing
   resources :reports do
-    member do
-      # Dedicated route for toggling status in the dashboard
-      patch :update_status
-    end
+    member { patch :update_status }
     collection do
-      get :lookup    # The page where users enter their protocol
-      get :integrity # The public landing page
+      get :lookup
+      get :integrity
     end
   end
 
-  # Due Diligence (Gestão de Diligência)
+  # Due Diligence
   resources :diligences do
-    member do
-      # Dedicated route for toggling status in the management table
-      patch :update_status
-    end
+    member { patch :update_status }
   end
 
+  # --- MOVE THIS OUTSIDE ---
   namespace :admin do
-    resources :users
+    resources :users, only: [:index, :create, :update, :destroy] do
+      member do
+        patch :update_password
+      end
+    end
     get 'dashboard', to: 'dashboard#index'
   end
 
-  # Root path points to the Public Integrity Landing Page
   root "reports#integrity"
 end
