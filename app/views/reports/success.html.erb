@@ -1,0 +1,33 @@
+<% content_for :header_title, "Relato Enviado com Sucesso" %>
+<% content_for :header_desc, "Sua denúncia foi registrada em nosso sistema." %>
+
+<article class="card" style="max-width: 500px; margin: 0 auto;" data-controller="clipboard">
+  <p style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; line-height: 1.4;">
+    <strong>Atenção:</strong> Anote ou copie o código abaixo. Ele é a única forma de acompanhar o andamento do seu relato anonimamente.
+  </p>
+
+  <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 8px; text-align: center; border: 1px solid var(--border);">
+    <label style="display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.5rem;">
+      Seu Protocolo
+    </label>
+    <h2 data-clipboard-target="source" style="font-family: monospace; letter-spacing: 2px; color: var(--text-main); margin-bottom: 1rem;">
+      <%= @report.protocolo %>
+    </h2>
+    
+    <button type="button" 
+            class="button button--outline" 
+            style="width: 100%;" 
+            data-action="click->clipboard#copy">
+      <span data-clipboard-target="buttonText">Copiar Código</span>
+    </button>
+  </div>
+
+  <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem;">
+    <% if Current.user %>
+      <%= link_to "Ver Painel de Relatos", reports_path, class: "button button--primary", style: "text-align: center;" %>
+    <% end %>
+    
+    <%= link_to "Consultar Protocolo", lookup_reports_path, class: "button button--outline", style: "text-align: center;" %>
+    <%= link_to "Voltar ao Início", root_path, style: "text-align: center; font-size: 0.9rem; color: var(--text-muted); text-decoration: none; margin-top: 0.5rem;" %>
+  </div>
+</article>

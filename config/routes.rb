@@ -5,7 +5,11 @@ Rails.application.routes.draw do
 
   # Whistleblowing
   resources :reports do
-    member { patch :update_status }
+    member do 
+      patch :update_status
+      get :success
+    end
+
     collection do
       get :lookup
       get :integrity

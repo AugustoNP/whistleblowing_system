@@ -33,7 +33,7 @@ class ReportsController < ApplicationController
 
     if @report.save
       notice = "Enviado com sucesso! Protocolo: #{@report.protocolo}"
-      redirect_to (Current.user ? reports_path : root_path), notice: notice
+      redirect_to success_report_path(@report)
     else
       render :new, status: :unprocessable_entity
     end
@@ -66,6 +66,10 @@ class ReportsController < ApplicationController
       @report = Report.find_by(protocolo: params[:protocolo].upcase.strip)
       flash.now[:alert] = "Protocolo não encontrado." if @report.nil?
     end
+  end
+
+  def success
+  @report = Report.find(params[:id])
   end
 
   def integrity; end
