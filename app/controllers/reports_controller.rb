@@ -1,9 +1,9 @@
 class ReportsController < ApplicationController
-  allow_unauthenticated_access only: %i[new create lookup integrity]
-  before_action :require_authentication, except: %i[new create lookup integrity]
+  allow_unauthenticated_access only: %i[new create lookup integrity success]
+  before_action :require_authentication, except: %i[new create lookup integrity success]
   
   # FIX 1: Removed :destroy
-  before_action :set_report, only: %i[show edit update update_status]
+  before_action :set_report, only: %i[show edit update update_status success]
 
   # FIX 2: Added authorize_report_access to 'index' as well
   before_action :authorize_report_access!, only: %i[index update_status]
@@ -69,7 +69,7 @@ class ReportsController < ApplicationController
   end
 
   def success
-  @report = Report.find(params[:id])
+  # @report = Report.find(params[:id])
   end
 
   def integrity; end

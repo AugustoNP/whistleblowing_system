@@ -22,6 +22,26 @@
     </button>
   </div>
 
+<div class="report-form__body" style="margin-top: 2.5rem; text-align: center;">
+    
+    
+    <div class="form-field" style="align-items: center;">
+      <label class="report-form__label">Nome do Relator</label>
+      <div style="color: var(--text-main); font-weight: 700; font-size: 1.1rem;">
+        <%= @report.nome.presence || "Anônimo" %>
+      </div>
+    </div>
+
+    
+    <div class="form-field" style="align-items: center;">
+      <label class="report-form__label">Descrição Enviada</label>
+      <div class="form-textarea" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main); text-align: left; min-height: auto; white-space: pre-wrap;">
+        <%= @report.descricao %>
+      </div>
+    </div>
+
+  </div>
+
   <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem;">
     <% if Current.user %>
       <%= link_to "Ver Painel de Relatos", reports_path, class: "button button--primary", style: "text-align: center;" %>

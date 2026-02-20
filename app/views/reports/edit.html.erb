@@ -4,6 +4,9 @@
 <article class="card">
   <header class="card__header card__header--split">
     <h2 class="card__title">Informações e Apuração</h2>
+    <span style="font-size: 0.85rem; color: var(--text-muted);">
+        Enviado em: <strong><%= @report.created_at.strftime("%d/%m/%Y") %></strong>
+      </span>
     <span class="badge badge--<%= @report.status %>"><%= @report.status.humanize %></span>
   </header>
   
@@ -43,7 +46,7 @@
 
         <%# SECTION 2: RH INPUTS %>
         <fieldset class="report-form__group">
-          <legend class="card__title" style="font-size: 1.1rem; border: none; margin-bottom: 1rem;">Apuração Interna (RH)</legend>
+          <legend class="card__title" style="font-size: 1.1rem; border: none; margin-bottom: 1rem;">Apuração Interna</legend>
           
           <div class="form-row">
             <div class="form-field">
