@@ -1,60 +1,94 @@
 <% content_for :header_title, "Painel de Administração" %>
 <% content_for :header_desc, "Gestão e monitoramento de relatos recebidos." %>
 
+<%# 1. THE ENGINE - Note: requestSubmit() used in the inputs below %>
+<%= form_with url: reports_path, method: :get, id: "filter-form", 
+              data: { turbo_frame: "reports_table", turbo_action: "advance" } do |f| %>
+  <%= hidden_field_tag :sort, params[:sort] %>
+  <%= hidden_field_tag :direction, params[:direction] %>
+<% end %>
+
 <article class="card">
   <header class="card__header card__header--split">
     <h2 class="card__title">Relatos Recebidos</h2>
     <%= link_to "Novo Relato", new_report_path, class: "button button--primary" %>
   </header>
 
-  <div class="card__table-wrapper">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Protocolo</th>
-          
-          <th>Data</th>
-          <th>Categoria</th>
-          <th>Unidade</th>
-          <th>Status</th>
-          <th class="text-right">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @reports.each do |report| %>
+  <%# 2. THE FRAME - We add a min-height style to prevent "collapse jumping" %>
+  <%= turbo_frame_tag "reports_table", target: "_top", data: { autoscroll: "false" }, style: "min-height: 600px; display: block;" do %>
+    <div class="card__table-wrapper">
+      <table class="data-table">
+        <thead>
           <tr>
-            <td><strong><%= report.protocolo %></strong></td>
-            
-            
-            <td style="white-space: nowrap; color: var(--text-muted); font-size: 0.9rem;">
-              <%= report.created_at.strftime("%d/%m/%Y") %>
-            </td>
+            <th><%= sortable_header "protocolo", "Protocolo" %></th>
+            <th><%= sortable_header "created_at", "Data" %></th>
+            <th><%= sortable_header "categoria", "Categoria" %></th>
+            <th><%= sortable_header "local", "Unidade" %></th>
+            <th><%= sortable_header "status", "Status" %></th>
+            <th class="text-right">Ações</th>
+          </tr>
 
-            <td><%= report.categoria %></td>
-
-            <td><%= report.local.presence || "Não informado" %></td>
-
+          <tr style="background: #fafafa;">
             <td>
-              <%= form_with url: update_status_report_path(report), method: :patch, class: "inline-form" do |f| %>
-                <%= f.select :status, 
-                    Report.statuses.keys.map { |s| [s.humanize, s] }, 
-                    { selected: report.status }, 
-                    { 
-                      class: "badge badge--#{report.status}", 
-                      onchange: "this.form.requestSubmit()",
-                      style: "cursor: pointer; border: none; font-family: inherit; appearance: none; -webkit-appearance: none;" 
-                    } %>
+              <input type="text" name="protocolo" form="filter-form" value="<%= params[:protocolo] %>" 
+                     placeholder="Buscar..." class="form-input" style="padding: 4px; font-size: 0.8rem;" 
+                     oninput="clearTimeout(this.delay); this.delay = setTimeout(() => this.form.requestSubmit(), 500)">
+            </td>
+            <td>
+              <input type="date" name="data" form="filter-form" value="<%= params[:data] %>" 
+                     class="form-input" style="padding: 4px; font-size: 0.8rem;" 
+                     onchange="this.form.requestSubmit()">
+            </td>
+            <td>
+              <%= select_tag :categoria, options_for_select(Report.distinct.pluck(:categoria).compact, params[:categoria]), 
+                  { form: "filter-form", include_blank: "Todas", class: "form-select", style: "padding: 4px; font-size: 0.8rem;", onchange: "this.form.requestSubmit()" } %>
+            </td>
+            <td>
+              <%= select_tag :local, options_for_select(Report.distinct.pluck(:local).compact, params[:local]), 
+                  { form: "filter-form", include_blank: "Todas", class: "form-select", style: "padding: 4px; font-size: 0.8rem;", onchange: "this.form.requestSubmit()" } %>
+            </td>
+            <td>
+              <%= select_tag :status, options_for_select(Report.statuses.keys.map { |s| [s.humanize, Report.statuses[s]] }, params[:status]), 
+                  { form: "filter-form", include_blank: "Todos", class: "form-select", style: "padding: 4px; font-size: 0.8rem;", onchange: "this.form.requestSubmit()" } %>
+            </td>
+            <td class="text-right">
+               <% if params.values_at(:protocolo, :data, :categoria, :local, :status).any?(&:present?) %>
+                <%= link_to "Limpar", reports_path, data: { turbo_frame: "_top" }, class: "link-delete", style: "padding: 4px 8px; font-size: 0.7rem;" %>
               <% end %>
             </td>
-
-            <td class="text-right">
-              <div class="action-group">
-                <%= link_to "Editar", edit_report_path(report), class: "link-action" %>
-              </div>
-            </td>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          <% @reports.each do |report| %>
+            <tr id="<%= dom_id report %>">
+              <td><strong><%= report.protocolo %></strong></td>
+              <td style="white-space: nowrap; color: var(--text-muted); font-size: 0.9rem;"><%= report.created_at.strftime("%d/%m/%Y") %></td>
+              <td><%= report.categoria %></td>
+              <td><%= report.local.presence || "Não informado" %></td>
+              <td>
+                <%# THE STATUS UPDATE FORM %>
+                <%= form_with url: update_status_report_path(report), method: :patch, data: { turbo_frame: "reports_table" } do |f| %>
+                  <%# Hidden fields carry current filters back to controller so the view stays filtered %>
+                  <% params.slice(:protocolo, :data, :categoria, :local, :sort, :direction).each do |k, v| %>
+                    <%= hidden_field_tag k, v %>
+                  <% end %>
+                  <%= f.select :status, 
+                      Report.statuses.keys.map { |s| [s.humanize, s] }, 
+                      { selected: report.status }, 
+                      { 
+                        class: "badge badge--#{report.status}", 
+                        onchange: "this.form.requestSubmit()",
+                        style: "cursor: pointer; border: none; font-family: inherit; appearance: none;" 
+                      } %>
+                <% end %>
+              </td>
+              <td class="text-right">
+                <%= link_to "Editar", edit_report_path(report), data: { turbo: false }, class: "link-action" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
 </article>

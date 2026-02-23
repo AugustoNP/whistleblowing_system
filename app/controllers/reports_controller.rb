@@ -12,6 +12,24 @@ class ReportsController < ApplicationController
   def index
     # Now that the table is split, we just grab all Reports (Whistleblowing)
     @reports = Report.order(created_at: :desc)
+
+    # Exact matches for dropdowns
+    @reports = @reports.where(categoria: params[:categoria]) if params[:categoria].present?
+    @reports = @reports.where(local: params[:local]) if params[:local].present?
+    @reports = @reports.where(status: params[:status]) if params[:status].present?
+
+    # Partial match for Protocolo
+    @reports = @reports.where("protocolo ILIKE ?", "%#{params[:protocolo].strip}%") if params[:protocolo].present?
+
+    # Date match
+    @reports = @reports.where("CAST(created_at AS DATE) = ?", params[:data]) if params[:data].present?
+
+    # Sorting logic
+    allowed = %w[protocolo created_at categoria local status]
+    sort_col = allowed.include?(params[:sort]) ? params[:sort] : "created_at"
+    sort_dir = %w[asc desc].include?(params[:direction]) ? params[:direction] : "desc"
+    
+    @reports = @reports.order("#{sort_col} #{sort_dir}")
   end
 
   # GET /reports/:id
@@ -69,7 +87,6 @@ class ReportsController < ApplicationController
   end
 
   def success
-  # @report = Report.find(params[:id])
   end
 
   def integrity; end
