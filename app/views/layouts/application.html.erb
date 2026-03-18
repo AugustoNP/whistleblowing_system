@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+  <% if notice %>
+  <div class="flash flash--notice" style="background: #d4edda; color: #155724; padding: 1rem; text-align: center; border-bottom: 1px solid #c3e6cb;">
+    <%= notice %>
+  </div>
+  <% end %>
+
   <title>
     <%= content_for?(:title) ? yield(:title) : "Canal de Denúncias" %> 
     <%# Updated to handle both models %>
@@ -35,7 +42,9 @@
             <% when 'rh' %>
               Analista de RH
             <% when 'diligence' %>
-              Analista de Diligência
+              Diligência interna
+            <% when 'outsider' %>
+              Diligência externa
             <% else %>
               Colaborador
             <% end %>
@@ -80,7 +89,7 @@
         <%# Grupos Restritos: Somente para Usuários Autenticados %>
         <% if authenticated? %>
           <div class="dropdown__group border-top">
-            <% if Current.user.admin? || Current.user.diligence? %>
+            <% if Current.user.admin? || Current.user.diligence? || Current.user.outsider? %>
               <%= link_to new_diligence_path, class: "dropdown__item" do %>
                 <strong>Nova Due Diligence</strong>
                 <small>Cadastrar empresa</small>
@@ -88,6 +97,13 @@
               <%= link_to diligences_path, class: "dropdown__item" do %>
                 <strong>Gestão de Diligência</strong>
                 <small>Analisar empresas cadastradas</small>
+              <% end %>
+            <% end %>
+
+            <% if Current.user.admin? || Current.user.diligence?%>
+              <%= link_to new_admin_diligence_invitation_path, class: "dropdown__item" do %>
+                <strong>Convidar empresa</strong>
+                <small>Iniciar o processo de cadastro</small>
               <% end %>
             <% end %>
 

@@ -1,0 +1,9 @@
+<p>Olá, <%= @user.username %>,</p>
+<p>Sua empresa foi registrada no nosso sistema de Due Diligence.</p>
+<p>Para preencher o questionário, utilize as credenciais abaixo:</p>
+<ul>
+  <li><strong>Link de Acesso:</strong> <%= @url %></li>
+  <li><strong>Login (E-mail):</strong> <%= @user.email_address %></li>
+  <li><strong>Senha Temporária:</strong> <%= @password %></li>
+</ul>
+<p><em>Importante: Por segurança, você será solicitado a alterar sua senha no primeiro login.</em></p>

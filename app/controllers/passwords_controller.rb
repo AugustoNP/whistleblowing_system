@@ -1,6 +1,6 @@
 class PasswordsController < ApplicationController
   allow_unauthenticated_access
-  before_action :set_user_by_token, only: %i[ edit update ]
+  before_action :set_user, only: %i[ edit update ]
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_password_path, alert: "Try again later." }
 
   def new
@@ -19,10 +19,14 @@ class PasswordsController < ApplicationController
 
   def update
     if @user.update(password_params)
-      @user.sessions.destroy_all
-      redirect_to new_session_path, notice: "Password has been reset."
+
+      @user.update!(force_password_change: false) if @user.force_password_change?
+
+
+      @user.sessions.where.not(id: Current.session&.id).destroy_all
+
+      redirect_to root_path, notice: "Senha atualizada com sucesso. Acesso liberado!"
     else
-      # Rendering :edit preserves the form data and shows specific validation errors
       render :edit, status: :unprocessable_entity
     end
   end
@@ -34,8 +38,20 @@ class PasswordsController < ApplicationController
     rescue ActiveSupport::MessageVerifier::InvalidSignature
       redirect_to new_password_path, alert: "Password reset link is invalid or has expired."
     end
+    def set_user
+      # If logged in (Forced Change), use Current.user
+      # If not logged in (Forgot Password), use the token
+      if authenticated?
+        @user = Current.user
+      else
+        @user = User.find_by_password_reset_token!(params[:token])
+      end
+    rescue ActiveSupport::MessageVerifier::InvalidSignature, ActiveRecord::RecordNotFound
+      redirect_to new_password_path, alert: "O link de redefinição é inválido ou expirou."
+    end
 
     def password_params
-      params.permit(:password, :password_confirmation)
+      # Use require/permit to match the form submission
+      params.require(:user).permit(:password, :password_confirmation)
     end
 end

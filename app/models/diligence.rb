@@ -1,5 +1,7 @@
 class Diligence < ApplicationRecord
 
+  belongs_to :user
+
   has_many :socios, dependent: :destroy
   has_many :empresa_vinculadas, dependent: :destroy
   has_many :participacao_socios, dependent: :destroy

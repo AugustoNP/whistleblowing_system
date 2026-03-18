@@ -4,11 +4,16 @@ class DiligencesController < ApplicationController
   before_action :authorize_diligence_access!
 
   def index
-    @diligences = Diligence.order(created_at: :desc)
+    if Current.user.outsider?
+      # Security: Outsiders only get their own records
+      @diligences = Current.user.diligences.order(created_at: :desc)
+    else
+      # Staff/Admin get the full list
+      @diligences = Diligence.order(created_at: :desc)
+    end
   end
 
   def show
-    # This will render your complex Section 1-7 matrix
   end
 
   def new
@@ -17,6 +22,7 @@ class DiligencesController < ApplicationController
 
   def create
     @diligence = Diligence.new(diligence_params)
+    @diligence.user = Current.user
     if @diligence.save
       redirect_to @diligence, notice: "Diligência criada com sucesso."
     else
@@ -26,40 +32,52 @@ class DiligencesController < ApplicationController
   def edit
     # Renders the analysis form
   end
-def update
-  @diligence = Diligence.find(params[:id])
-  if @diligence.update(diligence_params)
-    # Hardcode the redirect to the index page specifically
-    redirect_to diligences_path, notice: "Status atualizado com sucesso."
-  else
-    # If update fails, we still need to show errors
-    redirect_to diligences_path, alert: "Erro ao atualizar status."
+  def update
+    @diligence = Diligence.find(params[:id])
+    if @diligence.update(diligence_params)
+      # Hardcode the redirect to the index page specifically
+      redirect_to diligences_path, notice: "Status atualizado com sucesso."
+    else
+      # If update fails, we still need to show errors
+      redirect_to diligences_path, alert: "Erro ao atualizar status."
+    end
   end
-end
 
   def destroy
   @diligence.destroy
   redirect_to diligences_path, notice: "Registro de Due Diligence excluído com sucesso.", status: :see_other
   end
 
-def update_status
-  @diligence = Diligence.find(params[:id])
-  
-  # update_columns bypasses validations and saves only the status field
-  if @diligence.update_columns(status: params[:status])
-    redirect_to diligences_path, notice: "Status atualizado com sucesso."
-  else
-    redirect_to diligences_path, alert: "Erro ao atualizar status."
+  def update_status
+    @diligence = Diligence.find(params[:id])
+
+    # update_columns bypasses validations and saves only the status field
+    if @diligence.update_columns(status: params[:status])
+      redirect_to diligences_path, notice: "Status atualizado com sucesso."
+    else
+      redirect_to diligences_path, alert: "Erro ao atualizar status."
+    end
   end
-end
   private
 
   def set_diligence
+  if Current.user.outsider?
+    @diligence = Current.user.diligences.find(params[:id])
+  else
     @diligence = Diligence.find(params[:id])
+  end
+  rescue ActiveRecord::RecordNotFound
+    redirect_to diligences_path, alert: "Registro não encontrado ou você não tem permissão para vê-lo."
   end
 
   def authorize_diligence_access!
-    unless Current.user.admin? || Current.user.diligence?
+      if @diligence.present? && Current.user.outsider?
+      unless @diligence.user == Current.user
+        redirect_to diligences_path, alert: "Acesso negado: Este registro não pertence a você."
+      end
+      end
+
+    unless Current.user.admin? || Current.user.diligence? || Current.user.outsider?
       redirect_to root_path, alert: "Acesso restrito à área de Compliance."
     end
   end

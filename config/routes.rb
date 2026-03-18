@@ -1,7 +1,10 @@
 Rails.application.routes.draw do
   # Authentication
   resource :session
-  resources :passwords, param: :token
+
+  resource :password, only: [:new, :create, :edit, :update] do
+    get "/edit/:token", to: "passwords#edit", as: :edit_with_token
+  end
 
   # Whistleblowing
   resources :reports do
@@ -16,13 +19,15 @@ Rails.application.routes.draw do
     end
   end
 
-  # Due Diligence
+
   resources :diligences do
+    resources :diligence_invitations, only: [:new, :create]
     member { patch :update_status }
   end
 
-  # --- MOVE THIS OUTSIDE ---
+
   namespace :admin do
+    resources :diligence_invitations, only: [:new, :create]
     resources :users, only: [:index, :create, :update, :destroy] do
       member do
         patch :update_password

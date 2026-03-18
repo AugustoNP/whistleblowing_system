@@ -1,0 +1,62 @@
+<% content_for :header_title, "Gestão de Terceiros" %>
+<% content_for :header_desc, "Convide uma nova empresa para o processo de Due Diligence." %>
+
+<article class="card" style="max-width: 500px; margin: 0 auto;">
+  <div class="card__header">
+    <h2 class="card__title">Convidar Empresa</h2>
+  </div>
+
+  <%# Local feedback for errors within this form %>
+  <% if flash[:alert] %>
+    <div class="report-form__feedback report-form__feedback--error" style="margin-bottom: 1.5rem; color: #dc3545; background: #fff5f5; padding: 0.75rem; border-radius: 4px; border: 1px solid #ffc1c1;">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
+
+  <% if flash[:notice] %>
+    <div class="report-form__feedback report-form__feedback--success" style="margin-bottom: 1.5rem; color: #28a745; background: #f4fff4; padding: 0.75rem; border-radius: 4px; border: 1px solid #c1ffc1;">
+      <%= flash[:notice] %>
+    </div>
+  <% end %>
+
+  <%= form_with url: admin_diligence_invitations_path, method: :post, class: "report-form" do |f| %>
+    
+    <div class="form-field">
+      <%= f.label :razao_social, "Razão Social" %>
+      <%= f.text_field :razao_social, 
+          required: true, 
+          autofocus: true, 
+          class: "form-input", 
+          placeholder: "Nome Oficial da Empresa" %>
+    </div>
+
+    <div class="form-field">
+      <%= f.label :cnpj, "CNPJ" %>
+      <%= f.text_field :cnpj, 
+          required: true, 
+          class: "form-input", 
+          placeholder: "00.000.000/0001-00",
+          data: { controller: "mask", mask_type: "cnpj" } %>
+    </div>
+
+    <div class="form-field">
+      <%= f.label :email, "E-mail do Responsável" %>
+      <%= f.email_field :email, 
+          required: true, 
+          class: "form-input", 
+          placeholder: "contato@empresa.com" %>
+      <small style="color: #6c757d; display: block; margin-top: 0.25rem;">
+        As credenciais de acesso serão enviadas para este endereço.
+      </small>
+    </div>
+
+    <div class="report-form__footer" style="margin-top: 2rem;">
+      <%= f.submit "Enviar Convite e Criar Acesso", 
+          class: "button button--primary", 
+          style: "width: 100%;",
+          data: { disable_with: "Processando..." } %>
+      
+      <%= link_to "Cancelar", diligences_path, class: "button button--secondary", style: "width: 100%; text-align: center; margin-top: 0.5rem; text-decoration: none;" %>
+    </div>
+  <% end %>
+</article>

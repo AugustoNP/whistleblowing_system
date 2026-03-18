@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_28_132633) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_18_202420) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -73,7 +73,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_132633) do
     t.string "ubo"
     t.text "ubo_txt"
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
     t.string "website"
+    t.index ["user_id"], name: "index_diligences_on_user_id"
   end
 
   create_table "empresa_vinculadas", force: :cascade do |t|
@@ -172,6 +174,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_132633) do
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address", null: false
+    t.boolean "force_password_change", default: false
     t.string "password_digest", null: false
     t.integer "role"
     t.datetime "updated_at", null: false
@@ -180,6 +183,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_132633) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  add_foreign_key "diligences", "users"
   add_foreign_key "empresa_vinculadas", "diligences"
   add_foreign_key "licencas", "diligences"
   add_foreign_key "parentescos", "diligences"

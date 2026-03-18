@@ -2,8 +2,9 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
 
-  # UPDATED ENUM: visitor(0), rh(1), diligence(2), admin(3)
-  enum :role, { visitor: 0, rh: 1, diligence: 2, admin: 3 }, default: :visitor
+  enum :role, { visitor: 0, rh: 1, diligence: 2, admin: 3, outsider: 4 }, default: :visitor
+
+  has_many :diligences, dependent: :destroy
 
   validates :email_address, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :username, presence: true, uniqueness: true
