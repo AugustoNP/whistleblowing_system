@@ -29,12 +29,21 @@
 
   <% if @report %>
     <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+      
       <h3 style="margin-bottom: 1rem;">Status do Relato</h3>
+      
       <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-secondary); padding: 1rem; border-radius: 8px;">
+        
         <span><strong>Protocolo:</strong> <%= @report.protocolo %></span>
+        
         <span class="badge badge--status-<%= @report.status %>" style="font-weight: bold;">
           <%= @report.status.humanize %>
         </span>
+      
+      </div>
+
+      <div class="form-textarea" style="background: var(--bg-app); border-color: var(--border); color: var(--text-muted); min-height: 150px; white-space: pre-wrap;">
+        <%= @report.descricao %>
       </div>
       
       <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">

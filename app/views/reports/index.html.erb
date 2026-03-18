@@ -1,7 +1,7 @@
 <% content_for :header_title, "Painel de Administração" %>
 <% content_for :header_desc, "Gestão e monitoramento de relatos recebidos." %>
 
-<%# 1. THE ENGINE - Note: requestSubmit() used in the inputs below %>
+
 <%= form_with url: reports_path, method: :get, id: "filter-form", 
               data: { turbo_frame: "reports_table", turbo_action: "advance" } do |f| %>
   <%= hidden_field_tag :sort, params[:sort] %>
@@ -14,7 +14,6 @@
     <%= link_to "Novo Relato", new_report_path, class: "button button--primary" %>
   </header>
 
-  <%# 2. THE FRAME - We add a min-height style to prevent "collapse jumping" %>
   <%= turbo_frame_tag "reports_table", target: "_top", data: { autoscroll: "false" }, style: "min-height: 600px; display: block;" do %>
     <div class="card__table-wrapper">
       <table class="data-table">
