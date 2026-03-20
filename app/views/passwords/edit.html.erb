@@ -1,50 +1,17 @@
-<% content_for :header_title, "Segurança da Conta" %>
-<% content_for :header_desc, "Para sua proteção, defina uma nova senha definitiva para acessar o painel de conformidade." %>
-
-<article class="card" style="max-width: 450px; margin: 0 auto;">
+<article class="card">
   <div class="card__header">
     <h2 class="card__title">Atualizar Senha</h2>
   </div>
 
-  <%# Error feedback for validation (e.g., passwords don't match) %>
-  <% if @user && @user.errors.any? %>
-    <div class="report-form__feedback" style="margin-bottom: 1.5rem; color: #dc3545; background: #fff5f5; padding: 0.75rem; border-radius: 4px; border: 1px solid #ffc1c1; font-size: 0.9rem;">
-      <%= @user.errors.full_messages.to_sentence %>
-    </div>
-  <% end %>
 
-  <% if flash[:alert] %>
-    <div class="report-form__feedback" style="margin-bottom: 1.5rem; color: #856404; background: #fff3cd; padding: 0.75rem; border-radius: 4px; border: 1px solid #ffeeba; font-size: 0.9rem;">
-      <%= flash[:alert] %>
-    </div>
-  <% end %>
+  <%= ui_form_feedback(@user) %>
 
-  <%# We use PATCH and pass the token from the params if it exists %>
   <%= form_with model: @user, url: password_path(token: params[:token]), method: :patch, class: "report-form" do |f| %>
-    
-    <div class="form-field">
-      <%= f.label :password, "Nova Senha" %>
-      <%= f.password_field :password, 
-          required: true, 
-          autofocus: true, 
-          autocomplete: "new-password", 
-          class: "form-input",
-          placeholder: "Mínimo 8 caracteres" %>
-    </div>
+    <%= ui_password_input f, :password, label: "Nova Senha", show_rules: true %>
+    <%= ui_password_input f, :password_confirmation, label: "Confirme a Senha" %>
 
-    <div class="form-field">
-      <%= f.label :password_confirmation, "Confirmar Nova Senha" %>
-      <%= f.password_field :password_confirmation, 
-          required: true, 
-          autocomplete: "new-password", 
-          class: "form-input",
-          placeholder: "Repita a senha escolhida" %>
-    </div>
-
-    <div class="report-form__footer" style="margin-top: 2rem;">
-      <%= f.submit "Salvar e Acessar Sistema", 
-          class: "button button--primary", 
-          style: "width: 100%;" %>
+    <div class="report-form__footer">
+      <%= f.submit "Salvar e Acessar Sistema", class: "button button--primary", style: "width: 100%;" %>
     </div>
   <% end %>
 </article>

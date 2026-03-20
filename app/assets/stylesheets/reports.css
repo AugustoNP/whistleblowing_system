@@ -1,7 +1,11 @@
 /* ==========================================================================
    GLOBAL RESET & LAYOUT
    ========================================================================== */
-html, body {
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+   html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden; /* Prevents horizontal scroll from 100vw header */
@@ -207,6 +211,12 @@ body {
     align-items: center;
 }
 
+.card--auth {
+  max-width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* ==========================================================================
    4. FORM ELEMENTS & GRID
    ========================================================================== */
@@ -387,11 +397,22 @@ label,
    6. FEEDBACK & STATES
    ========================================================================== */
 .report-form__feedback {
-    background: var(--error-bg);
-    color: var(--error-text);
-    padding: 1rem;
-    border-radius: var(--radius);
-    margin-bottom: 2rem;
+  padding: 0.8rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.report-form__feedback--error {
+  background-color: #fff5f5;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+}
+
+.report-form__feedback--alert {
+  background-color: #fffaf0;
+  color: #9c4221;
+  border: 1px solid #fbd38d;
 }
 
 .error-list {
@@ -634,7 +655,8 @@ form.inline {
   border: 2px solid rgba(255,255,255,0.3); 
 }
 .user-profile__avatar--diligence, 
-.user-profile__avatar--rh { 
+.user-profile__avatar--rh,
+.user-profile__avatar--outsider { 
   background-color: #334155; 
   border: 2px solid rgba(255,255,255,0.3); 
 }
