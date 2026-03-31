@@ -89,4 +89,30 @@ module UiHelper
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-sessions-target="eyeClose" style="display: none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
     SVG
   end
+
+
+  def ui_highlight_card(style: nil, &block)
+      content_tag :div, 
+                  style: "background: var(--bg-secondary); padding: 2rem; border-radius: 8px; text-align: center; border: 1px solid var(--border); #{style}", 
+                  &block
+  end
+
+  def ui_card_label(text, style: nil)
+    content_tag :label, text, 
+                style: "display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.5rem; #{style}"
+  end
+
+  def ui_card_value(text, size: "1.75rem", data: {})
+    content_tag :h2, text, data: data, 
+                style: "font-family: monospace; letter-spacing: 2px; color: var(--text-main); margin-bottom: 1rem; font-size: #{size};"
+  end
+
+  def ui_card_content(text)
+    content_tag :div, text, class: "form-textarea", 
+                style: "background: var(--bg-app); border-color: var(--border); color: var(--text-main); text-align: left; min-height: auto; white-space: pre-wrap;"
+  end
+
+  def ui_card_divider
+    tag :hr, style: "border: 0; border-top: 1px solid var(--border); margin: 2rem 0;"
+  end
 end
